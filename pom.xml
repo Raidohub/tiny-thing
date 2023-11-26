@@ -9,8 +9,7 @@
     </parent>
 
     <modules>
-        <module>logic-op</module>
-        <module>tiny-web</module>
+        <module>rule-tree</module>
     </modules>
 
     <modelVersion>4.0.0</modelVersion>

@@ -1,6 +1,0 @@
-# DataSource Config
-spring:
-  datasource:
-    url: jdbc:mysql://localhost:3306/logic_op
-    username: root
-    password: rootroot
