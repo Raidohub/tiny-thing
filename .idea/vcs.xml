@@ -3,5 +3,6 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/tiny-web/src/main/resources/webapp" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/tiny-web/src/main/resources/webapp/tiny-web" vcs="Git" />
   </component>
 </project>
