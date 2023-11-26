@@ -1,5 +1,6 @@
 package org.amumu.logic.op.client.service;
 
+import org.amumu.logic.op.client.model.req.ExpressionParamReq;
 import org.amumu.logic.op.client.model.req.ExpressionRequest;
 import org.amumu.logic.op.domain.ExpressionDomain;
 
@@ -12,5 +13,5 @@ public interface ExpressionService {
 
     List<ExpressionDomain> selectList();
 
-    Boolean parser(String param);
+    Boolean parser(ExpressionParamReq paramReq);
 }

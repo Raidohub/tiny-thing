@@ -39,7 +39,7 @@ public class ConditionParser {
         String filed = condition.getField();
         String filedVal = retrieveFieldVal(param, filed);
         if (filedVal == null) {
-//            log.error("【{}】condition match retrieve 【{}】return null", condition, filed);
+            log.error("【{}】condition match retrieve 【{}】return null", condition, filed);
             return false;
         }
 
@@ -156,7 +156,7 @@ public class ConditionParser {
         try {
             return JSON.toJSONString(condition);
         } catch (Exception e) {
-//            log.error("【{}】 condition2Str error, err:【{}】", condition, e.getMessage());
+            log.error("【{}】 condition2Str error, err:【{}】", condition, e.getMessage());
             return null;
         }
     }
@@ -170,7 +170,7 @@ public class ConditionParser {
         try {
             return JSON.parseObject(conditionStr, ExpressionConditionDomain.class);
         } catch (Exception e) {
-//            log.error("【{}】str2Condition error, err:【{}】", conditionStr, e.getMessage());
+            log.error("【{}】str2Condition error, err:【{}】", conditionStr, e.getMessage());
             return null;
         }
     }

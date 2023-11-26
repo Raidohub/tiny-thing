@@ -1,6 +1,7 @@
 package org.amumu.logic.op.domain.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.amumu.logic.op.client.model.req.ExpressionParamReq;
 import org.amumu.logic.op.client.model.req.ExpressionRequest;
 import org.amumu.logic.op.client.service.ExpressionService;
 import org.amumu.logic.op.domain.ExpressionDomain;
@@ -59,17 +60,16 @@ public class ExpressionServiceImpl implements ExpressionService {
     }
 
     @Override
-    public Boolean parser(String param) {
+    public Boolean parser(ExpressionParamReq paramReq) {
+        if (paramReq == null) {
+            log.info("request is null");
+            return null;
+        }
         ExpressionDO expressionDO = expressionRepoService.selectById(1L);
         if (expressionDO == null) {
             log.info("expressionDOList is empty");
             return null;
         }
-        Map<String, String> paramMap = new HashMap<>();
-        paramMap.put("threshold", param);
-
-        ExpressionParam expressionParam = new ExpressionParam();
-        expressionParam.setExtra(paramMap);
-        return ConditionParser.parser(expressionDO.getCondition(), expressionParam);
+        return ConditionParser.parser(expressionDO.getCondition(), paramReq);
     }
 }
