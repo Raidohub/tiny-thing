@@ -9,11 +9,14 @@ import org.amumu.logic.op.domain.mapper.BeanMapper;
 import org.amumu.logic.op.domain.repo.RuleTreeRepoService;
 import org.amumu.logic.op.infra.dao.model.RuleTreeDO;
 import org.amumu.logic.op.infra.utils.ConditionParser;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -62,11 +65,35 @@ public class RuleTreeServiceImpl implements RuleTreeService {
             log.info("request is null");
             return null;
         }
-        RuleTreeDO ruleTreeDO = ruleTreeRepoService.selectById(1L);
-        if (ruleTreeDO == null) {
-            log.info("ruleTreeDO is empty");
-            return null;
+
+        return Optional.ofNullable(paramReq.getCondition())
+                .map(condition -> this.doParser(paramReq))
+                .orElseGet(() -> {
+                    RuleTreeDO ruleTreeDO = ruleTreeRepoService.selectById(1L);
+                    if (ruleTreeDO == null) {
+                        log.info("ruleTreeDO is empty");
+                        return null;
+                    }
+                    paramReq.setCondition(ruleTreeDO.getCondition());
+                    return this.doParser(paramReq);
+                });
+    }
+
+    private boolean doParser(RuleTreeParamReq paramReq) {
+        if (null == paramReq) {
+            log.info("request param not exist");
+            return false;
         }
-        return ConditionParser.parser(ruleTreeDO.getCondition(), paramReq);
+        if (StringUtils.isBlank(paramReq.getCondition())) {
+            log.info("condition not exist");
+            return false;
+        }
+
+        try {
+            return ConditionParser.parser(paramReq.getCondition(), paramReq);
+        } catch (Exception e) {
+            log.info("parser error");
+        }
+        return false;
     }
 }

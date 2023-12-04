@@ -11,11 +11,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 @RestController
-@CrossOrigin
-@RequestMapping("/api/v1/rule_tree")
+@RequestMapping("/api/v1/rule_tree/")
 public class RuleTreeController {
 
     @Autowired
@@ -39,9 +40,20 @@ public class RuleTreeController {
         return Result.ok(ruleTreeService.createCondition(ruleTreeRequest));
     }
 
-    @GetMapping("parser")
+    @PostMapping("parser")
     public Result<Boolean> parser(@RequestBody RuleTreeParamReq paramReq) {
         return Result.ok(ruleTreeService.parser(paramReq));
     }
 
+    @GetMapping("load")
+    public Result<List<String>> load(String type) {
+        if ("fields".equals(type)) {
+            return Result.ok(Arrays.asList("name","age","gender"));
+        } else if ("ops".equals(type)) {
+            return Result.ok(Arrays.asList("=", "!=", ">", "≥", "<", "≤", "in", "not in", "like", "not like"));
+        } else if ("logics".equals(type)) {
+            return Result.ok(Arrays.asList("AND", "OR", "NOT"));
+        }
+        return Result.ok();
+    }
 }
