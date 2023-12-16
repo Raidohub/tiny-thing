@@ -28,6 +28,35 @@ public class ConditionParser {
     }
 
     /**
+     * 逻辑运算符，编排表达式
+     * @param condition 表达式
+     * @param param 参数
+     * @return 逻辑运算结果
+     */
+    public static boolean evaluate(RuleTreeConditionDomain condition, RuleTreeParam param) {
+        if (condition == null) {
+            return false;
+        }
+
+        String type = condition.getType();
+        if (RuleTreeEnum.CONDITION.getName().equals(type)) {
+            RuleTreeConditionDomain subCondition = JsonUtil.jsonNode2obj(condition.getConditions(), RuleTreeConditionDomain.class);
+            // 【条件】
+            return evaluate(subCondition, param);
+        } else if (RuleTreeEnum.ENABLED.getName().equals(type)) {
+            // 【开关】-返回开关的值【TRUE|FALSE]
+            return Boolean.parseBoolean(condition.getVal().get(0));
+        } else if (RuleTreeEnum.LogicalOperationEnum.AND.getName().equals(type)) {
+            return LogicOperator.AND.operator(condition.getConditions(), param);
+        } else if (RuleTreeEnum.LogicalOperationEnum.OR.getName().equals(type)) {
+            return LogicOperator.OR.operator(condition.getConditions(), param);
+        } else if (RuleTreeEnum.LogicalOperationEnum.NOT.getName().equals(type)) {
+            return LogicOperator.NOT.operator(condition.getConditions(), param);
+        }
+        return express(condition, param);
+    }
+
+    /**
      * 执行表达式
      * @param condition 表达式
      * @param param 参数
@@ -70,35 +99,6 @@ public class ConditionParser {
             return !valList.contains(filedVal);
         }
         throw new UnsupportedOperationException("Unsupported operation: " + op);
-    }
-
-    /**
-     * 逻辑运算符，编排表达式
-     * @param condition 表达式
-     * @param param 参数
-     * @return 逻辑运算结果
-     */
-    public static boolean evaluate(RuleTreeConditionDomain condition, RuleTreeParam param) {
-        if (condition == null) {
-            return false;
-        }
-
-        String type = condition.getType();
-        if (RuleTreeEnum.CONDITION.getName().equals(type)) {
-            RuleTreeConditionDomain subCondition = JsonUtil.jsonNode2obj(condition.getConditions(), RuleTreeConditionDomain.class);
-            // 【条件】
-            return evaluate(subCondition, param);
-        } else if (RuleTreeEnum.ENABLED.getName().equals(type)) {
-            // 【开关】-返回开关的值【TRUE|FALSE]
-            return Boolean.parseBoolean(condition.getVal().get(0));
-        } else if (RuleTreeEnum.LogicalOperationEnum.AND.getName().equals(type)) {
-            return LogicOperator.AND.operator(condition.getConditions(), param);
-        } else if (RuleTreeEnum.LogicalOperationEnum.OR.getName().equals(type)) {
-            return LogicOperator.OR.operator(condition.getConditions(), param);
-        } else if (RuleTreeEnum.LogicalOperationEnum.NOT.getName().equals(type)) {
-            return LogicOperator.NOT.operator(condition.getConditions(), param);
-        }
-        return express(condition, param);
     }
 
     /**
