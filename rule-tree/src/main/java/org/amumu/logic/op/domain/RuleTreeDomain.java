@@ -3,7 +3,7 @@ package org.amumu.logic.op.domain;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 import org.amumu.logic.op.client.model.req.RuleTreeRequest;
-import org.amumu.logic.op.infra.utils.ConditionParser;
+import org.amumu.logic.op.infra.functions.ruletree.ConditionParser;
 
 import java.util.Date;
 

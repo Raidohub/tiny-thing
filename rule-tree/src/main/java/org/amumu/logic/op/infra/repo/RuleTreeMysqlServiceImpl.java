@@ -4,12 +4,14 @@ import org.amumu.logic.op.domain.repo.RuleTreeRepoService;
 import org.amumu.logic.op.infra.dao.RuleTreeMapper;
 import org.amumu.logic.op.infra.dao.model.RuleTreeDO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-@Repository
-public class RuleTreeRepoServiceImpl implements RuleTreeRepoService {
+@Primary
+@Repository("ruleTreeMysql")
+public class RuleTreeMysqlServiceImpl implements RuleTreeRepoService {
 
     @Autowired
     private RuleTreeMapper ruleTreeMapper;

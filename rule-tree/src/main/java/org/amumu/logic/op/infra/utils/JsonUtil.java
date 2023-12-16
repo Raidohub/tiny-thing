@@ -6,7 +6,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.amumu.logic.op.client.exception.JsonUtilException;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 /**
  * Utility class for JSON serialization and deserialization.
@@ -38,15 +43,15 @@ public class JsonUtil {
      * Converts a JsonNode to an object of the specified type.
      *
      * @param jsonNode the JsonNode to convert
-     * @param valueType the target class for the object
+     * @param valType the target class for the object
      * @param <T> the type of the desired object
      * @return an object of type T
      */
-    public static <T> T jsonNode2obj(JsonNode jsonNode, Class<T> valueType) {
+    public static <T> T jsonNode2obj(JsonNode jsonNode, Class<T> valType) {
         try {
-            return OBJECT_MAPPER.treeToValue(jsonNode, valueType);
+            return OBJECT_MAPPER.treeToValue(jsonNode, valType);
         } catch (JsonProcessingException e) {
-            log.error("Error parsing JsonNode to {} class: {}", valueType.getSimpleName(), e.getMessage());
+            log.error("Error parsing JsonNode to {} class: {}", valType.getSimpleName(), e.getMessage());
             throw new JsonUtilException("Error parsing JsonNode to object", e);
         }
     }
@@ -55,17 +60,51 @@ public class JsonUtil {
      * Converts a JsonNode to a List of objects of the specified type.
      *
      * @param jsonNode the JsonNode to convert
-     * @param valueType the target class for the objects in the list
+     * @param valType the target class for the objects in the list
      * @param <T> the type of the desired objects
      * @return a List of objects of type T
      */
-    public static <T> List<T> jsonNode2List(JsonNode jsonNode, Class<T> valueType) {
+    public static <T> List<T> jsonNode2List(JsonNode jsonNode, Class<T> valType) {
         try {
             return OBJECT_MAPPER.readValue(OBJECT_MAPPER.treeAsTokens(jsonNode),
-                    OBJECT_MAPPER.getTypeFactory().constructCollectionType(List.class, valueType));
+                    OBJECT_MAPPER.getTypeFactory().constructCollectionType(List.class, valType));
         } catch (Exception e) {
-            log.error("Error parsing JsonNode to {} class: {}", valueType.getSimpleName(), e.getMessage());
+            log.error("Error parsing JsonNode to {} class: {}", valType.getSimpleName(), e.getMessage());
             throw new JsonUtilException("Error parsing JsonNode to list", e);
+        }
+    }
+
+    /**
+     * Converts a JsonNode containing an array of objects into a Map with designated keys.
+     *
+     * @param <K> The type of the keys in the resulting Map.
+     * @param <V> The type of the values in the resulting Map.
+     * @param jsonNode The JsonNode containing the JSON array to be converted.
+     * @param valType The class of the value objects within the array.
+     * @param retrieveKey A function that retrieves the key from a value object.
+     * @return A Map with keys and values generated from the jsonNode array.
+     * @throws JsonUtilException if parsing the JsonNode fails.
+     */
+    public static <K, V> Map<K, V> jsonNode2Map(JsonNode jsonNode, Class<V> valType, Function<V, K> retrieveKey) {
+        if (jsonNode == null || !jsonNode.isArray()) {
+            throw new IllegalArgumentException("The provided JsonNode must be an array node.");
+        }
+
+        try {
+            List<V> valList = OBJECT_MAPPER.readValue(OBJECT_MAPPER.treeAsTokens(jsonNode),
+                    OBJECT_MAPPER.getTypeFactory().constructCollectionType(List.class, valType));
+            Map<K, V> result = new HashMap<>(valList.size());
+            for (V v : valList) {
+                K key = retrieveKey.apply(v);
+                if (key == null) {
+                    throw new IllegalStateException("The retrieveKey function must not return null.");
+                }
+                result.put(key, v);
+            }
+            return result;
+        } catch (Exception e) {
+            log.error("Error parsing JsonNode to {} class.", valType.getSimpleName(), e);
+            throw new JsonUtilException("Error parsing JsonNode to map of type " + valType.getSimpleName(), e);
         }
     }
 
@@ -73,15 +112,15 @@ public class JsonUtil {
      * Converts a JSON string to an object of the specified type.
      *
      * @param jsonStr the JSON string to convert
-     * @param valueType the target class for the object
+     * @param valType the target class for the object
      * @param <T> the type of the desired object
      * @return an object of type T
      */
-    public static <T> T str2obj(String jsonStr, Class<T> valueType) {
+    public static <T> T str2obj(String jsonStr, Class<T> valType) {
         try {
-            return OBJECT_MAPPER.readValue(jsonStr, valueType);
+            return OBJECT_MAPPER.readValue(jsonStr, valType);
         } catch (JsonProcessingException e) {
-            log.error("Error parsing JSON string to {} class: {}", valueType.getSimpleName(), e.getMessage());
+            log.error("Error parsing JSON string to {} class: {}", valType.getSimpleName(), e.getMessage());
             throw new JsonUtilException("Error parsing JSON string", e);
         }
     }
@@ -90,16 +129,16 @@ public class JsonUtil {
      * Converts a JSON string to a List of objects of the specified type.
      *
      * @param jsonStr the JSON string to convert
-     * @param valueType the target class for the objects in the list
+     * @param valType the target class for the objects in the list
      * @param <T> the type of the desired objects
      * @return a List of objects of type T
      */
-    public static <T> List<T> str2List(String jsonStr, Class<T> valueType) {
+    public static <T> List<T> str2List(String jsonStr, Class<T> valType) {
         try {
             return OBJECT_MAPPER.readValue(jsonStr,
-                    OBJECT_MAPPER.getTypeFactory().constructCollectionType(List.class, valueType));
+                    OBJECT_MAPPER.getTypeFactory().constructCollectionType(List.class, valType));
         } catch (JsonProcessingException e) {
-            log.error("Error parsing str to {} class: {}", valueType.getSimpleName(), e.getMessage());
+            log.error("Error parsing str to {} class: {}", valType.getSimpleName(), e.getMessage());
             throw new JsonUtilException("Error parsing JSON array", e);
         }
     }

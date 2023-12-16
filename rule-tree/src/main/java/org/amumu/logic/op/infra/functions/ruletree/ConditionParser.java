@@ -1,10 +1,10 @@
-package org.amumu.logic.op.infra.utils;
+package org.amumu.logic.op.infra.functions.ruletree;
 
 import lombok.extern.slf4j.Slf4j;
 import org.amumu.logic.op.client.RuleTreeEnum;
-import org.amumu.logic.op.domain.model.RuleTreeParam;
 import org.amumu.logic.op.domain.RuleTreeConditionDomain;
-import org.apache.logging.log4j.util.Strings;
+import org.amumu.logic.op.domain.model.RuleTreeParam;
+import org.amumu.logic.op.infra.utils.JsonUtil;
 import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Field;
@@ -38,7 +38,7 @@ public class ConditionParser {
         String filed = condition.getField();
         String filedVal = retrieveFieldVal(param, filed);
         if (filedVal == null) {
-            log.error("【{}】condition match retrieve 【{}】return null", condition, filed);
+            log.error("【{}】condition match retrieve【{}】return null", condition, filed);
             return false;
         }
 
@@ -78,7 +78,7 @@ public class ConditionParser {
      * @param param 参数
      * @return 逻辑运算结果
      */
-    private static boolean evaluate(RuleTreeConditionDomain condition, RuleTreeParam param) {
+    public static boolean evaluate(RuleTreeConditionDomain condition, RuleTreeParam param) {
         if (condition == null) {
             return false;
         }
@@ -92,35 +92,11 @@ public class ConditionParser {
             // 【开关】-返回开关的值【TRUE|FALSE]
             return Boolean.parseBoolean(condition.getVal().get(0));
         } else if (RuleTreeEnum.LogicalOperationEnum.AND.getName().equals(type)) {
-            // 【AND】
-            List<RuleTreeConditionDomain> subConditions = JsonUtil.jsonNode2List(condition.getConditions(), RuleTreeConditionDomain.class);
-            for (RuleTreeConditionDomain subCondition : subConditions) {
-                if (!evaluate(subCondition, param)) {
-                    return false;
-                }
-            }
-            return true;
+            return LogicOperator.AND.operator(condition.getConditions(), param);
         } else if (RuleTreeEnum.LogicalOperationEnum.OR.getName().equals(type)) {
-            // 【OR】
-            List<RuleTreeConditionDomain> subConditions = JsonUtil.jsonNode2List(condition.getConditions(), RuleTreeConditionDomain.class);
-            // 根据id拿到指定的条件，如果指定的条件不存在，或者返回false，再遍历剩余条件
-            if (Strings.isNotBlank(param.getId())) {
-                for (RuleTreeConditionDomain subCondition : subConditions) {
-                    if (subCondition.getId().equals(condition.getId()) && evaluate(subCondition, param)) {
-                        return true;
-                    }
-                }
-            }
-            for (RuleTreeConditionDomain subCondition : subConditions) {
-                if (evaluate(subCondition, param)) {
-                    return true;
-                }
-            }
-            return false;
+            return LogicOperator.OR.operator(condition.getConditions(), param);
         } else if (RuleTreeEnum.LogicalOperationEnum.NOT.getName().equals(type)) {
-            // 【NOT】
-            RuleTreeConditionDomain subCondition = JsonUtil.jsonNode2obj(condition.getConditions(), RuleTreeConditionDomain.class);
-            return !evaluate(subCondition, param);
+            return LogicOperator.NOT.operator(condition.getConditions(), param);
         }
         return express(condition, param);
     }

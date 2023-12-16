@@ -5,7 +5,7 @@ import org.amumu.logic.op.client.model.res.RuleTreeVO;
 import org.amumu.logic.op.domain.RuleTreeConditionDomain;
 import org.amumu.logic.op.domain.RuleTreeDomain;
 import org.amumu.logic.op.infra.dao.model.RuleTreeDO;
-import org.amumu.logic.op.infra.utils.ConditionParser;
+import org.amumu.logic.op.infra.functions.ruletree.ConditionParser;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;

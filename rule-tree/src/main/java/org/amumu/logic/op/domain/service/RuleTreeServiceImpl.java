@@ -8,12 +8,11 @@ import org.amumu.logic.op.domain.RuleTreeDomain;
 import org.amumu.logic.op.domain.mapper.BeanMapper;
 import org.amumu.logic.op.domain.repo.RuleTreeRepoService;
 import org.amumu.logic.op.infra.dao.model.RuleTreeDO;
-import org.amumu.logic.op.infra.utils.ConditionParser;
+import org.amumu.logic.op.infra.functions.ruletree.ConditionParser;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
