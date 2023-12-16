@@ -1,5 +1,6 @@
 package org.amumu.logic.op.domain;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Data;
 
 import java.util.List;
@@ -13,5 +14,5 @@ public class RuleTreeConditionDomain {
     private String field;
     private String op;
     private List<String> val;
-    private String conditions;
+    private JsonNode conditions;
 }

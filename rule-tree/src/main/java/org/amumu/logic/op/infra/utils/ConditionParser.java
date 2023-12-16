@@ -1,6 +1,5 @@
 package org.amumu.logic.op.infra.utils;
 
-import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import org.amumu.logic.op.client.RuleTreeEnum;
 import org.amumu.logic.op.domain.model.RuleTreeParam;
@@ -86,18 +85,15 @@ public class ConditionParser {
 
         String type = condition.getType();
         if (RuleTreeEnum.CONDITION.getName().equals(type)) {
-            RuleTreeConditionDomain subCondition = JSON.parseObject(condition.getConditions(), RuleTreeConditionDomain.class);
+            RuleTreeConditionDomain subCondition = JsonUtil.jsonNode2obj(condition.getConditions(), RuleTreeConditionDomain.class);
             // 【条件】
             return evaluate(subCondition, param);
-        } else if (RuleTreeEnum.COMMON.getName().equals(type)) {
-            // 【通用】
-            return express(condition, param);
         } else if (RuleTreeEnum.ENABLED.getName().equals(type)) {
             // 【开关】-返回开关的值【TRUE|FALSE]
             return Boolean.parseBoolean(condition.getVal().get(0));
         } else if (RuleTreeEnum.LogicalOperationEnum.AND.getName().equals(type)) {
             // 【AND】
-            List<RuleTreeConditionDomain> subConditions = JSON.parseArray(condition.getConditions(), RuleTreeConditionDomain.class);
+            List<RuleTreeConditionDomain> subConditions = JsonUtil.jsonNode2List(condition.getConditions(), RuleTreeConditionDomain.class);
             for (RuleTreeConditionDomain subCondition : subConditions) {
                 if (!evaluate(subCondition, param)) {
                     return false;
@@ -106,7 +102,7 @@ public class ConditionParser {
             return true;
         } else if (RuleTreeEnum.LogicalOperationEnum.OR.getName().equals(type)) {
             // 【OR】
-            List<RuleTreeConditionDomain> subConditions = JSON.parseArray(condition.getConditions(), RuleTreeConditionDomain.class);
+            List<RuleTreeConditionDomain> subConditions = JsonUtil.jsonNode2List(condition.getConditions(), RuleTreeConditionDomain.class);
             // 根据id拿到指定的条件，如果指定的条件不存在，或者返回false，再遍历剩余条件
             if (Strings.isNotBlank(param.getId())) {
                 for (RuleTreeConditionDomain subCondition : subConditions) {
@@ -123,7 +119,7 @@ public class ConditionParser {
             return false;
         } else if (RuleTreeEnum.LogicalOperationEnum.NOT.getName().equals(type)) {
             // 【NOT】
-            RuleTreeConditionDomain subCondition = JSON.parseObject(condition.getConditions(), RuleTreeConditionDomain.class);
+            RuleTreeConditionDomain subCondition = JsonUtil.jsonNode2obj(condition.getConditions(), RuleTreeConditionDomain.class);
             return !evaluate(subCondition, param);
         }
         return express(condition, param);
@@ -154,7 +150,7 @@ public class ConditionParser {
      */
     public static String convert2ConditionStr(RuleTreeConditionDomain condition) {
         try {
-            return JSON.toJSONString(condition);
+            return JsonUtil.obj2JsonStr(condition);
         } catch (Exception e) {
             log.error("【{}】 condition2Str error, err:【{}】", condition, e.getMessage());
             return null;
@@ -168,7 +164,7 @@ public class ConditionParser {
      */
     public static RuleTreeConditionDomain convert2Condition(String conditionStr) {
         try {
-            return JSON.parseObject(conditionStr, RuleTreeConditionDomain.class);
+            return JsonUtil.str2obj(conditionStr, RuleTreeConditionDomain.class);
         } catch (Exception e) {
             log.error("【{}】str2Condition error, err:【{}】", conditionStr, e.getMessage());
             return null;
@@ -176,7 +172,7 @@ public class ConditionParser {
     }
 
     public static void main(String[] args) {
-        String conditionJson = "{\"id\":\"-1\",\"name\":\"签证时效切流配置\",\"op\":null,\"val\":null,\"type\":\"condition\",\"conditions\":{\"id\":\"0\",\"name\":null,\"op\":null,\"val\":null,\"type\":\"and\",\"field\":null,\"conditions\":[{\"id\":\"1\",\"name\":\"whitelist\",\"op\":null,\"val\":[\"true\"],\"type\":\"enabled\",\"field\":null,\"conditions\":null},{\"id\":\"0\",\"name\":null,\"op\":null,\"val\":null,\"type\":\"or\",\"field\":null,\"conditions\":[{\"id\":\"1\",\"name\":\"itemId\",\"op\":\"in\",\"val\":[\"2\",\"3\"],\"type\":\"int\",\"field\":\"itemId\",\"conditions\":null},{\"id\":\"-1\",\"name\":null,\"op\":null,\"val\":null,\"type\":\"condition\",\"field\":null,\"conditions\":{\"id\":0,\"name\":null,\"op\":null,\"val\":null,\"type\":\"or\",\"field\":null,\"conditions\":[{\"name\":\"threshold\",\"id\":\"2\",\"op\":\"gte\",\"val\":[\"95\"],\"type\":\"int\",\"field\":\"threshold\",\"conditions\":null},{\"name\":\"isSeller\",\"id\":\"3\",\"op\":\"eq\",\"val\":[\"true\"],\"type\":\"boolean\",\"field\":\"isSeller\",\"conditions\":null}]}}]}]}}";
+        String conditionJson = "{\"id\":\"-1\",\"name\":\"签证时效切流配置\",\"op\":null,\"val\":null,\"type\":\"condition\",\"conditions\":{\"id\":\"0\",\"name\":null,\"op\":null,\"val\":null,\"type\":\"and\",\"field\":null,\"conditions\":[{\"id\":\"1\",\"name\":\"xxxSwitch\",\"op\":null,\"val\":[\"true\"],\"type\":\"enabled\",\"field\":null,\"conditions\":null},{\"id\":\"0\",\"name\":null,\"op\":null,\"val\":null,\"type\":\"or\",\"field\":null,\"conditions\":[{\"id\":\"1\",\"name\":\"itemId\",\"op\":\"in\",\"val\":[\"2\",\"3\"],\"type\":\"int\",\"field\":\"itemId\",\"conditions\":null},{\"id\":\"-1\",\"name\":null,\"op\":null,\"val\":null,\"type\":\"condition\",\"field\":null,\"conditions\":{\"id\":0,\"name\":null,\"op\":null,\"val\":null,\"type\":\"or\",\"field\":null,\"conditions\":[{\"name\":\"threshold\",\"id\":\"2\",\"op\":\"gte\",\"val\":[\"95\"],\"type\":\"int\",\"field\":\"threshold\",\"conditions\":null},{\"name\":\"isSeller\",\"id\":\"3\",\"op\":\"eq\",\"val\":[\"true\"],\"type\":\"boolean\",\"field\":\"isSeller\",\"conditions\":null}]}}]}]}}";
 
         ConditionParser parser = new ConditionParser();
         RuleTreeParam param = new RuleTreeParam();
@@ -184,11 +180,7 @@ public class ConditionParser {
         map.put("threshold", "94");
         param.setExtra(map );
 
-        try {
-            boolean evaluateResult = parser.parser(conditionJson, param);
-            System.out.println("evaluate result: " + evaluateResult);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        boolean evaluateResult = parser.parser(conditionJson, param);
+        System.out.println("evaluate result: " + evaluateResult);
     }
 }

@@ -3,8 +3,7 @@ package org.amumu.logic.op.client;
 public enum RuleTreeEnum {
 
     CONDITION("condition"),
-    ENABLED("enabled"),
-    COMMON("common");
+    ENABLED("enabled");
 
     private String name;
 
