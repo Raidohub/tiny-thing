@@ -31,7 +31,10 @@ public class ConditionParser {
      */
     public static Boolean parser(String conditionStr, RuleTreeParam param) {
         RuleTreeConditionDomain condition = convert2Condition(conditionStr);
-        PATH_CHAIN_FACTORY.initPath(condition.getId(), condition.getName());
+        String id = Optional.ofNullable(condition).map(RuleTreeConditionDomain::getId).orElse(null);
+        String name = Optional.ofNullable(condition).map(RuleTreeConditionDomain::getName).orElse(null);
+
+        PATH_CHAIN_FACTORY.initPath(id, name);
         return evaluate(condition, param);
     }
 
