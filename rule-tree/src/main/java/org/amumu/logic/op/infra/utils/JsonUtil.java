@@ -10,8 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
 
 /**
  * Utility class for JSON serialization and deserialization.
@@ -19,10 +17,6 @@ import java.util.function.Supplier;
 @Slf4j
 public class JsonUtil {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-
-    private JsonUtil() {
-        // Private constructor to prevent instantiation
-    }
 
     /**
      * Converts a JSON string to a JsonNode object.

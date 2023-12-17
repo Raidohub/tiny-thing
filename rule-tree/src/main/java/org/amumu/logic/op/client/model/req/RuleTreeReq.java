@@ -3,7 +3,7 @@ package org.amumu.logic.op.client.model.req;
 import lombok.Data;
 
 @Data
-public class RuleTreeRequest {
+public class RuleTreeReq {
     private Long id;
     private String bizCode;
     private String condition;

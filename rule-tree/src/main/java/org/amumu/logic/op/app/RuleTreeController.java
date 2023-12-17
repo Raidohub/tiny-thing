@@ -2,7 +2,8 @@ package org.amumu.logic.op.app;
 
 import org.amumu.logic.op.client.model.Result;
 import org.amumu.logic.op.client.model.req.RuleTreeParamReq;
-import org.amumu.logic.op.client.model.req.RuleTreeRequest;
+import org.amumu.logic.op.client.model.req.RuleTreeReq;
+import org.amumu.logic.op.client.model.res.RuleTreeResultVO;
 import org.amumu.logic.op.client.model.res.RuleTreeVO;
 import org.amumu.logic.op.client.service.RuleTreeService;
 import org.amumu.logic.op.domain.RuleTreeDomain;
@@ -12,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -33,15 +33,15 @@ public class RuleTreeController {
     }
 
     @PostMapping("create_condition")
-    public Result<Integer> createCondition(RuleTreeRequest ruleTreeRequest) {
-        if (ruleTreeRequest == null || StringUtils.isBlank(ruleTreeRequest.getCondition())) {
+    public Result<Integer> createCondition(RuleTreeReq ruleTreeReq) {
+        if (ruleTreeReq == null || StringUtils.isBlank(ruleTreeReq.getCondition())) {
             return Result.ok(null);
         }
-        return Result.ok(ruleTreeService.createCondition(ruleTreeRequest));
+        return Result.ok(ruleTreeService.createCondition(ruleTreeReq));
     }
 
     @PostMapping("parser")
-    public Result<Boolean> parser(@RequestBody RuleTreeParamReq paramReq) {
+    public Result<RuleTreeResultVO> parser(@RequestBody RuleTreeParamReq paramReq) {
         return Result.ok(ruleTreeService.parser(paramReq));
     }
 

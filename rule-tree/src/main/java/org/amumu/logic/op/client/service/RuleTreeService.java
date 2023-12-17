@@ -1,17 +1,18 @@
 package org.amumu.logic.op.client.service;
 
 import org.amumu.logic.op.client.model.req.RuleTreeParamReq;
-import org.amumu.logic.op.client.model.req.RuleTreeRequest;
+import org.amumu.logic.op.client.model.req.RuleTreeReq;
+import org.amumu.logic.op.client.model.res.RuleTreeResultVO;
 import org.amumu.logic.op.domain.RuleTreeDomain;
 
 import java.util.List;
 
 public interface RuleTreeService {
-    Integer createCondition(RuleTreeRequest ruleTreeRequest);
+    Integer createCondition(RuleTreeReq ruleTreeReq);
 
-    Integer updateCondition(RuleTreeRequest ruleTreeRequest);
+    Integer updateCondition(RuleTreeReq ruleTreeReq);
 
     List<RuleTreeDomain> selectList();
 
-    Boolean parser(RuleTreeParamReq paramReq);
+    RuleTreeResultVO parser(RuleTreeParamReq paramReq);
 }

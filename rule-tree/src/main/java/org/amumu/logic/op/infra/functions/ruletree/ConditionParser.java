@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.amumu.logic.op.client.RuleTreeEnum;
 import org.amumu.logic.op.domain.RuleTreeConditionDomain;
 import org.amumu.logic.op.domain.model.RuleTreeParam;
+import org.amumu.logic.op.infra.utils.ApplicationContextUtil;
 import org.amumu.logic.op.infra.utils.JsonUtil;
 import org.springframework.util.ReflectionUtils;
 
@@ -16,6 +17,17 @@ import java.util.Optional;
 @Slf4j
 public class ConditionParser {
 
+    private static PathChainFactory pathChainFactory;
+
+    static {
+        /**
+         * 兼容main方法
+         */
+        if (ApplicationContextUtil.isInitialized()) {
+            pathChainFactory = ApplicationContextUtil.getBean(PathChainFactory.class);
+        }
+    }
+
     /**
      * 根据输入参数，执行表达式，返回结果
      * @param conditionStr 表达式
@@ -24,6 +36,8 @@ public class ConditionParser {
      */
     public static Boolean parser(String conditionStr, RuleTreeParam param) {
         RuleTreeConditionDomain condition = convert2Condition(conditionStr);
+
+        pathChainFactory.initPath();
         return evaluate(condition, param);
     }
 
@@ -45,7 +59,9 @@ public class ConditionParser {
             return evaluate(subCondition, param);
         } else if (RuleTreeEnum.ENABLED.getName().equals(type)) {
             // 【开关】-返回开关的值【TRUE|FALSE]
-            return Boolean.parseBoolean(condition.getVal().get(0));
+            boolean result = Boolean.parseBoolean(condition.getVal().get(0));
+            pathChainFactory.chainPath(condition, result);
+            return result;
         } else if (RuleTreeEnum.LogicalOperationEnum.AND.getName().equals(type)) {
             return LogicOperator.AND.operator(condition.getConditions(), param);
         } else if (RuleTreeEnum.LogicalOperationEnum.OR.getName().equals(type)) {
@@ -68,31 +84,35 @@ public class ConditionParser {
         String filedVal = retrieveFieldVal(param, filed);
         if (filedVal == null) {
             log.error("【{}】condition match retrieve【{}】return null", condition, filed);
+            pathChainFactory.chainPath(condition, false);
             return false;
         }
 
         String op = condition.getOp();
         List<String> valList = condition.getVal();
-        return doExpress(op, valList, filedVal);
+        boolean result = doExpress(op, valList, filedVal);
+        pathChainFactory.chainPath(condition, result);
+        return result;
     }
 
     private static boolean doExpress(String op, List<String> valList, String filedVal) {
+        String val = valList.get(0);
         if (RuleTreeEnum.OperatorEnum.EQ.getName().equals(op)) {
-            return valList.get(0).equals(filedVal);
+            return val.equals(filedVal);
         } else if (RuleTreeEnum.OperatorEnum.NEQ.getName().equals(op)) {
-            return !valList.get(0).equals(filedVal);
+            return !val.equals(filedVal);
         } else if (RuleTreeEnum.OperatorEnum.LIKE.getName().equals(op)) {
-            return valList.get(0).contains(filedVal);
+            return val.contains(filedVal);
         } else if (RuleTreeEnum.OperatorEnum.NOT_LIKE.getName().equals(op)) {
-            return !valList.get(0).contains(filedVal);
+            return !val.contains(filedVal);
         } else if (RuleTreeEnum.OperatorEnum.GT.getName().equals(op)) {
-            return filedVal.compareTo(valList.get(0)) > 0;
+            return filedVal.compareTo(val) > 0;
         } else if (RuleTreeEnum.OperatorEnum.GTE.getName().equals(op)) {
-            return filedVal.compareTo(valList.get(0)) >= 0;
+            return filedVal.compareTo(val) >= 0;
         } else if (RuleTreeEnum.OperatorEnum.LT.getName().equals(op)) {
-            return filedVal.compareTo(valList.get(0)) < 0;
+            return filedVal.compareTo(val) < 0;
         } else if (RuleTreeEnum.OperatorEnum.LET.getName().equals(op)) {
-            return filedVal.compareTo(valList.get(0)) <= 0;
+            return filedVal.compareTo(val) <= 0;
         } else if (RuleTreeEnum.OperatorEnum.IN.getName().equals(op)) {
             return valList.contains(filedVal);
         } else if (RuleTreeEnum.OperatorEnum.NOT_IN.getName().equals(op)) {
@@ -124,7 +144,7 @@ public class ConditionParser {
      * @param condition 表达式条件对象
      * @return 表达式字符串
      */
-    public static String convert2ConditionStr(RuleTreeConditionDomain condition) {
+    public static String convert2conditionStr(RuleTreeConditionDomain condition) {
         try {
             return JsonUtil.obj2JsonStr(condition);
         } catch (Exception e) {
@@ -148,15 +168,16 @@ public class ConditionParser {
     }
 
     public static void main(String[] args) {
-        String conditionJson = "{\"id\":\"-1\",\"name\":\"签证时效切流配置\",\"op\":null,\"val\":null,\"type\":\"condition\",\"conditions\":{\"id\":\"0\",\"name\":null,\"op\":null,\"val\":null,\"type\":\"and\",\"field\":null,\"conditions\":[{\"id\":\"1\",\"name\":\"xxxSwitch\",\"op\":null,\"val\":[\"true\"],\"type\":\"enabled\",\"field\":null,\"conditions\":null},{\"id\":\"0\",\"name\":null,\"op\":null,\"val\":null,\"type\":\"or\",\"field\":null,\"conditions\":[{\"id\":\"1\",\"name\":\"itemId\",\"op\":\"in\",\"val\":[\"2\",\"3\"],\"type\":\"int\",\"field\":\"itemId\",\"conditions\":null},{\"id\":\"-1\",\"name\":null,\"op\":null,\"val\":null,\"type\":\"condition\",\"field\":null,\"conditions\":{\"id\":0,\"name\":null,\"op\":null,\"val\":null,\"type\":\"or\",\"field\":null,\"conditions\":[{\"name\":\"threshold\",\"id\":\"2\",\"op\":\"gte\",\"val\":[\"95\"],\"type\":\"int\",\"field\":\"threshold\",\"conditions\":null},{\"name\":\"isSeller\",\"id\":\"3\",\"op\":\"eq\",\"val\":[\"true\"],\"type\":\"boolean\",\"field\":\"isSeller\",\"conditions\":null}]}}]}]}}";
-
-        ConditionParser parser = new ConditionParser();
-        RuleTreeParam param = new RuleTreeParam();
+        pathChainFactory = new PathChainFactory();
         Map<String,String> map = new HashMap<>();
         map.put("threshold", "94");
-        param.setExtra(map );
+        RuleTreeParam param = new RuleTreeParam();
+        param.setExtra(map);
 
-        boolean evaluateResult = parser.parser(conditionJson, param);
-        System.out.println("evaluate result: " + evaluateResult);
+        String conditionJson = "{\"id\":\"-1\",\"name\":\"签证时效切流配置\",\"op\":null,\"val\":null,\"type\":\"condition\",\"conditions\":{\"id\":\"0\",\"name\":null,\"op\":null,\"val\":null,\"type\":\"and\",\"field\":null,\"conditions\":[{\"id\":\"1\",\"name\":\"xxxSwitch\",\"op\":null,\"val\":[\"true\"],\"type\":\"enabled\",\"field\":null,\"conditions\":null},{\"id\":\"2\",\"name\":null,\"op\":null,\"val\":null,\"type\":\"or\",\"field\":null,\"conditions\":[{\"id\":\"3\",\"name\":\"itemId\",\"op\":\"in\",\"val\":[\"2\",\"3\"],\"type\":\"int\",\"field\":\"itemId\",\"conditions\":null},{\"id\":\"4\",\"name\":null,\"op\":null,\"val\":null,\"type\":\"condition\",\"field\":null,\"conditions\":{\"id\":0,\"name\":null,\"op\":null,\"val\":null,\"type\":\"or\",\"field\":null,\"conditions\":[{\"name\":\"threshold\",\"id\":\"5\",\"op\":\"gte\",\"val\":[\"95\"],\"type\":\"int\",\"field\":\"threshold\",\"conditions\":null},{\"name\":\"isSeller\",\"id\":\"6\",\"op\":\"eq\",\"val\":[\"true\"],\"type\":\"boolean\",\"field\":\"isSeller\",\"conditions\":null}]}}]}]}}";
+        boolean result = ConditionParser.parser(conditionJson, param);
+        System.out.println("evaluate result: " + result);
+        System.out.println("evaluate path: ");
+        pathChainFactory.printPath();
     }
 }

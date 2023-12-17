@@ -2,7 +2,7 @@ package org.amumu.logic.op.domain;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
-import org.amumu.logic.op.client.model.req.RuleTreeRequest;
+import org.amumu.logic.op.client.model.req.RuleTreeReq;
 import org.amumu.logic.op.infra.functions.ruletree.ConditionParser;
 
 import java.util.Date;
@@ -27,8 +27,8 @@ public class RuleTreeDomain {
         this.setUserName("username");
     }
 
-    public void upgrade(RuleTreeRequest ruleTreeRequest) {
+    public void upgrade(RuleTreeReq ruleTreeReq) {
         this.version = this.version+1;
-        this.condition = ConditionParser.convert2Condition(ruleTreeRequest.getCondition());
+        this.condition = ConditionParser.convert2Condition(ruleTreeReq.getCondition());
     }
 }
