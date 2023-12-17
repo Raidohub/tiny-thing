@@ -6,12 +6,13 @@ import lombok.Data;
 public class RuleTreeResultVO {
     private Boolean result;
     private RuleTreePathVO root;
-    private String ruleTreeParam;
+    private String param;
 
     @Data
     public static class RuleTreePathVO {
         private String id;
         private String name;
+        private String param;
         private Boolean result;
         private RuleTreePathVO next;
     }

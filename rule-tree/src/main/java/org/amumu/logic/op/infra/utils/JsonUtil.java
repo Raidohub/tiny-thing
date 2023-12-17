@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.amumu.logic.op.client.exception.JsonUtilException;
-import org.amumu.logic.op.infra.functions.ruletree.PathChainFactory;
 
 import java.util.HashMap;
 import java.util.List;

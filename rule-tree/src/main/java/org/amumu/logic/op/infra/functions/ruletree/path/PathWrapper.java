@@ -6,5 +6,5 @@ import lombok.Data;
 public class PathWrapper {
     private Path root;
     private Boolean result;
-    private String ruleTreeParam;
+    private String param;
 }

@@ -11,6 +11,7 @@ public class Path {
 
     private String id;
     private String name;
+    private String param;
     private Boolean result;
     @JsonIgnore
     private Path next;

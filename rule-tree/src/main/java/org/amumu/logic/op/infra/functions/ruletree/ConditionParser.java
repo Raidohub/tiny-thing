@@ -31,7 +31,7 @@ public class ConditionParser {
      */
     public static Boolean parser(String conditionStr, RuleTreeParam param) {
         RuleTreeConditionDomain condition = convert2Condition(conditionStr);
-        PATH_CHAIN_FACTORY.initPath();
+        PATH_CHAIN_FACTORY.initPath(condition.getId(), condition.getName());
         return evaluate(condition, param);
     }
 
@@ -54,7 +54,7 @@ public class ConditionParser {
         } else if (RuleTreeEnum.ENABLED.getName().equals(type)) {
             // 【开关】-返回开关的值【TRUE|FALSE]
             boolean result = Boolean.parseBoolean(condition.getVal().get(0));
-            PATH_CHAIN_FACTORY.chainPath(condition, result);
+            PATH_CHAIN_FACTORY.chainPath(null, condition, result);
             return result;
         } else if (RuleTreeEnum.LogicalOperationEnum.AND.getName().equals(type)) {
             return LogicOperator.AND.operator(condition.getConditions(), param);
@@ -78,14 +78,14 @@ public class ConditionParser {
         String filedVal = retrieveFieldVal(param, filed);
         if (filedVal == null) {
             log.error("【{}】condition match retrieve【{}】return null", condition, filed);
-            PATH_CHAIN_FACTORY.chainPath(condition, false);
+            PATH_CHAIN_FACTORY.chainPath(null, condition, false);
             return false;
         }
 
         String op = condition.getOp();
         List<String> valList = condition.getVal();
         boolean result = doExpress(op, valList, filedVal);
-        PATH_CHAIN_FACTORY.chainPath(condition, result);
+        PATH_CHAIN_FACTORY.chainPath(filedVal, condition, result);
         return result;
     }
 

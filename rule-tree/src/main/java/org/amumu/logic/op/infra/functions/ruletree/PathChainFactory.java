@@ -15,17 +15,18 @@ public class PathChainFactory {
     private final ThreadLocal<Path> root = new ThreadLocal<>();
     private final ThreadLocal<Path> curr = new ThreadLocal<>();
 
-    public void initPath() {
+    public void initPath(String id, String name) {
         Path root = new Path();
-        root.setName("root");
-        root.setId("-1");
+        root.setId(id);
+        root.setName(name);
         this.root.set(root);
         this.curr.set(root);
     }
 
-    private Path buildPath(String id, String name, Boolean result) {
+    private Path buildPath(String id, String name, String param, Boolean result) {
         Path path = new Path();
         path.setResult(result);
+        path.setParam(param);
         path.setName(name);
         path.setId(id);
         return path;
@@ -35,9 +36,9 @@ public class PathChainFactory {
         curr.get().setNext(next);
     }
 
-    public void chainPath(RuleTreeConditionDomain condition, Boolean result) {
+    public void chainPath(String param, RuleTreeConditionDomain condition, Boolean result) {
         Path next = Optional.ofNullable(condition)
-                .map(e -> this.buildPath(e.getId(), e.getName(), result))
+                .map(e -> this.buildPath(e.getId(), e.getName(), param, result))
                 .orElse(null);
         this.chainNext(next);
         curr.set(curr.get().getNext());
@@ -45,7 +46,7 @@ public class PathChainFactory {
 
     public PathWrapper buildRuleTreePath(Boolean result, RuleTreeParam ruleTreeParam) {
         PathWrapper pathWrapper = new PathWrapper();
-        pathWrapper.setRuleTreeParam(JsonUtil.obj2JsonStr(ruleTreeParam));
+        pathWrapper.setParam(JsonUtil.obj2JsonStr(ruleTreeParam));
         pathWrapper.setRoot(root.get());
         pathWrapper.setResult(result);
         this.clear();

@@ -12,6 +12,7 @@ public class CustomConvertor {
         RuleTreeResultVO.RuleTreePathVO root = new RuleTreeResultVO.RuleTreePathVO();
         root.setNext(root2root(path.getNext()));
         root.setResult(path.getResult());
+        root.setParam(path.getParam());
         root.setName(path.getName());
         root.setId(path.getId());
         return root;

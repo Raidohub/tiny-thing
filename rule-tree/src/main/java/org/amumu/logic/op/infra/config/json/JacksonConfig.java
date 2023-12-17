@@ -39,16 +39,6 @@ public class JacksonConfig {
         builder.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
         JsonMapper jsonMapper = builder.build();
         JavaTimeModule javaTimeModule = new JavaTimeModule();
-        //添加 序列器  这里是对 BigDecimal 类型处理，这是关键代码
-        /*javaTimeModule.addSerializer(BigDecimal.class, new JsonSerializer<BigDecimal>() {
-            @Override
-            public void serialize(BigDecimal value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
-                DecimalFormat fnum = new DecimalFormat("#.##");
-                //把 这个BigDecimal 属性对应的值，写成 String 类型
-                gen.writeString(fnum.format(value));
-            }
-        });*/
-        //处理 时间格式
         javaTimeModule.addSerializer(LocalDateTime.class, new LocalDateTimeSerializer(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
         //注册
         jsonMapper.registerModule(javaTimeModule);
