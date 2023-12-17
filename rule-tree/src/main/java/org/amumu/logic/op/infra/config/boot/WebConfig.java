@@ -1,8 +1,7 @@
-package org.amumu.logic.op.infra.mw.boot;
+package org.amumu.logic.op.infra.config.boot;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 

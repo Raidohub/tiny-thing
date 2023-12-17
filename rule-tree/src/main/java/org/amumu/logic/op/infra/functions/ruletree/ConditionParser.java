@@ -1,10 +1,10 @@
 package org.amumu.logic.op.infra.functions.ruletree;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.amumu.logic.op.client.RuleTreeEnum;
 import org.amumu.logic.op.domain.RuleTreeConditionDomain;
 import org.amumu.logic.op.domain.model.RuleTreeParam;
-import org.amumu.logic.op.infra.utils.ApplicationContextUtil;
 import org.amumu.logic.op.infra.utils.JsonUtil;
 import org.springframework.util.ReflectionUtils;
 
@@ -17,15 +17,10 @@ import java.util.Optional;
 @Slf4j
 public class ConditionParser {
 
-    private static PathChainFactory pathChainFactory;
+    private static PathChainFactory PATH_CHAIN_FACTORY;
 
-    static {
-        /**
-         * 兼容main方法
-         */
-        if (ApplicationContextUtil.isInitialized()) {
-            pathChainFactory = ApplicationContextUtil.getBean(PathChainFactory.class);
-        }
+    public static void setPathChainFactory(PathChainFactory pathChainFactory) {
+        PATH_CHAIN_FACTORY = pathChainFactory;
     }
 
     /**
@@ -36,8 +31,7 @@ public class ConditionParser {
      */
     public static Boolean parser(String conditionStr, RuleTreeParam param) {
         RuleTreeConditionDomain condition = convert2Condition(conditionStr);
-
-        pathChainFactory.initPath();
+        PATH_CHAIN_FACTORY.initPath();
         return evaluate(condition, param);
     }
 
@@ -60,7 +54,7 @@ public class ConditionParser {
         } else if (RuleTreeEnum.ENABLED.getName().equals(type)) {
             // 【开关】-返回开关的值【TRUE|FALSE]
             boolean result = Boolean.parseBoolean(condition.getVal().get(0));
-            pathChainFactory.chainPath(condition, result);
+            PATH_CHAIN_FACTORY.chainPath(condition, result);
             return result;
         } else if (RuleTreeEnum.LogicalOperationEnum.AND.getName().equals(type)) {
             return LogicOperator.AND.operator(condition.getConditions(), param);
@@ -84,14 +78,14 @@ public class ConditionParser {
         String filedVal = retrieveFieldVal(param, filed);
         if (filedVal == null) {
             log.error("【{}】condition match retrieve【{}】return null", condition, filed);
-            pathChainFactory.chainPath(condition, false);
+            PATH_CHAIN_FACTORY.chainPath(condition, false);
             return false;
         }
 
         String op = condition.getOp();
         List<String> valList = condition.getVal();
         boolean result = doExpress(op, valList, filedVal);
-        pathChainFactory.chainPath(condition, result);
+        PATH_CHAIN_FACTORY.chainPath(condition, result);
         return result;
     }
 
@@ -168,7 +162,8 @@ public class ConditionParser {
     }
 
     public static void main(String[] args) {
-        pathChainFactory = new PathChainFactory();
+        PATH_CHAIN_FACTORY = new PathChainFactory();
+        JsonUtil.setPathChainFactory(new ObjectMapper());
         Map<String,String> map = new HashMap<>();
         map.put("threshold", "94");
         RuleTreeParam param = new RuleTreeParam();
@@ -178,6 +173,6 @@ public class ConditionParser {
         boolean result = ConditionParser.parser(conditionJson, param);
         System.out.println("evaluate result: " + result);
         System.out.println("evaluate path: ");
-        pathChainFactory.printPath();
+        PATH_CHAIN_FACTORY.printPath();
     }
 }

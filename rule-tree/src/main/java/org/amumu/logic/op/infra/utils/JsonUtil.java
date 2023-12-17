@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.amumu.logic.op.client.exception.JsonUtilException;
+import org.amumu.logic.op.infra.functions.ruletree.PathChainFactory;
 
 import java.util.HashMap;
 import java.util.List;
@@ -16,7 +17,11 @@ import java.util.function.Function;
  */
 @Slf4j
 public class JsonUtil {
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static ObjectMapper OBJECT_MAPPER;
+
+    public static void setPathChainFactory(ObjectMapper objectMapper) {
+        OBJECT_MAPPER = objectMapper;
+    }
 
     /**
      * Converts a JSON string to a JsonNode object.

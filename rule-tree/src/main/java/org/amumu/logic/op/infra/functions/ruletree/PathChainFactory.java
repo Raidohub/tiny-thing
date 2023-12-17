@@ -35,7 +35,7 @@ public class PathChainFactory {
         curr.get().setNext(next);
     }
 
-    public void chainPath(RuleTreeConditionDomain condition, boolean result) {
+    public void chainPath(RuleTreeConditionDomain condition, Boolean result) {
         Path next = Optional.ofNullable(condition)
                 .map(e -> this.buildPath(e.getId(), e.getName(), result))
                 .orElse(null);
