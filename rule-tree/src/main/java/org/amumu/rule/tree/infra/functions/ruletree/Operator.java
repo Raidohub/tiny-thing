@@ -16,7 +16,7 @@ public class Operator {
      * @param filedVal 参数字段值
      * @return boolean
      */
-    public static boolean operatorExpress(String op, List<String> valList, String filedVal) {
+    public static boolean commonOperate(String op, List<String> valList, String filedVal) {
         String val = valList.get(0);
         if (RuleTreeEnum.OperatorEnum.EQ.getName().equals(op)) {
             return val.equals(filedVal);
@@ -47,7 +47,7 @@ public class Operator {
      * @param condition 表达式
      * @return boolean
      */
-    public static boolean enableExpress(RuleTreeConditionDomain condition) {
+    public static boolean enableOperate(RuleTreeConditionDomain condition) {
         return Boolean.parseBoolean(condition.getVal().get(0));
     }
 }

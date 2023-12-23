@@ -59,11 +59,11 @@ public class ConditionParser {
             // 【开关】-返回开关的值【TRUE|FALSE]
             return enableExpress(condition);
         } else if (RuleTreeEnum.LogicalOperationEnum.AND.getName().equals(type)) {
-            return LogicOperator.AND.operator(condition.getConditions(), param);
+            return LogicOperator.AND.operate(condition.getConditions(), param);
         } else if (RuleTreeEnum.LogicalOperationEnum.OR.getName().equals(type)) {
-            return LogicOperator.OR.operator(condition.getConditions(), param);
+            return LogicOperator.OR.operate(condition.getConditions(), param);
         } else if (RuleTreeEnum.LogicalOperationEnum.NOT.getName().equals(type)) {
-            return LogicOperator.NOT.operator(condition.getConditions(), param);
+            return LogicOperator.NOT.operate(condition.getConditions(), param);
         }
         return operatorExpress(condition, param);
     }
@@ -74,7 +74,7 @@ public class ConditionParser {
      * @return boolean
      */
     private static boolean enableExpress(RuleTreeConditionDomain condition) {
-        boolean result = Operator.enableExpress(condition);
+        boolean result = Operator.enableOperate(condition);
         NODE_CHAIN_FACTORY.next(null, condition, result);
         return result;
     }
@@ -96,7 +96,7 @@ public class ConditionParser {
 
         String op = condition.getOp();
         List<String> valList = condition.getVal();
-        boolean result = Operator.operatorExpress(op, valList, filedVal);
+        boolean result = Operator.commonOperate(op, valList, filedVal);
         NODE_CHAIN_FACTORY.next(filedVal, condition, result);
         return result;
     }
