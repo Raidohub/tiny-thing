@@ -42,7 +42,7 @@ public class NodeChainFactory {
         curr.set(son);
     }
 
-    public void brother(String param, RuleTreeConditionDomain condition, Boolean result) {
+    public void setupBrother(String param, RuleTreeConditionDomain condition, Boolean result) {
         List<Node> brothers = curr.get().getBrothers();
         if (brothers == null) {
             brothers = new ArrayList<>();
