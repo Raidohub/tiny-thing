@@ -1,6 +1,5 @@
 package org.amumu.rule.tree.infra.functions.ruletree;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.amumu.rule.tree.client.RuleTreeEnum;
