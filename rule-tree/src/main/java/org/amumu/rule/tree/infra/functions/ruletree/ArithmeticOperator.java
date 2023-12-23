@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * 运算符
  */
-public class Operator {
+public class ArithmeticOperator {
 
     /**
      * 通用运算表达式

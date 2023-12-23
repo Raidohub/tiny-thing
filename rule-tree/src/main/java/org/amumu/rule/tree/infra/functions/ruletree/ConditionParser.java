@@ -58,7 +58,7 @@ public class ConditionParser {
         } else if (RuleTreeEnum.LogicalOperationEnum.enumValueOf(type) != null) {
             return logicOperate(condition, param, type);
         }
-        return commonOperate(condition, param);
+        return arithmeticOperate(condition, param);
     }
 
     /**
@@ -84,7 +84,7 @@ public class ConditionParser {
      * @return boolean
      */
     private static boolean enableOperate(RuleTreeConditionDomain condition) {
-        boolean result = Operator.enableOperate(condition);
+        boolean result = ArithmeticOperator.enableOperate(condition);
         NODE_CHAIN_FACTORY.setupChain(null, condition, result);
         return result;
     }
@@ -95,7 +95,7 @@ public class ConditionParser {
      * @param param 参数
      * @return boolean
      */
-    private static boolean commonOperate(RuleTreeConditionDomain condition, RuleTreeParam param) {
+    private static boolean arithmeticOperate(RuleTreeConditionDomain condition, RuleTreeParam param) {
         String filed = condition.getField();
         String filedVal = retrieveFieldVal(param, filed);
         if (filedVal == null) {
@@ -106,7 +106,7 @@ public class ConditionParser {
 
         String op = condition.getOp();
         List<String> valList = condition.getVal();
-        boolean result = Operator.commonOperate(op, valList, filedVal);
+        boolean result = ArithmeticOperator.commonOperate(op, valList, filedVal);
         NODE_CHAIN_FACTORY.setupChain(filedVal, condition, result);
         return result;
     }
