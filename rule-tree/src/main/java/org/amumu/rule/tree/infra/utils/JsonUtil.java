@@ -3,10 +3,12 @@ package org.amumu.rule.tree.infra.utils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.amumu.rule.tree.client.exception.JsonUtilException;
-
-import java.util.HashMap;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -15,12 +17,11 @@ import java.util.function.Function;
  * Utility class for JSON serialization and deserialization.
  */
 @Slf4j
+@Component
 public class JsonUtil {
+    @Setter
+    @Autowired
     private static ObjectMapper OBJECT_MAPPER;
-
-    public static void setPathChainFactory(ObjectMapper objectMapper) {
-        OBJECT_MAPPER = objectMapper;
-    }
 
     /**
      * Converts a JSON string to a JsonNode object.
@@ -91,7 +92,7 @@ public class JsonUtil {
         try {
             List<V> valList = OBJECT_MAPPER.readValue(OBJECT_MAPPER.treeAsTokens(jsonNode),
                     OBJECT_MAPPER.getTypeFactory().constructCollectionType(List.class, valType));
-            Map<K, V> result = new HashMap<>(valList.size());
+            Map<K, V> result = new LinkedHashMap<>(valList.size());
             for (V v : valList) {
                 K key = retrieveKey.apply(v);
                 if (key == null) {

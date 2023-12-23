@@ -2,6 +2,8 @@ package org.amumu.rule.tree.client.model.res;
 
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class RuleTreeResultVO {
     private Boolean result;
@@ -15,5 +17,6 @@ public class RuleTreeResultVO {
         private String param;
         private Boolean result;
         private RuleTreePathVO next;
+        private List<RuleTreePathVO> brothers;
     }
 }

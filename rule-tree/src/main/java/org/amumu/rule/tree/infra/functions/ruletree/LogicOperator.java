@@ -5,10 +5,12 @@ import org.amumu.rule.tree.domain.RuleTreeConditionDomain;
 import org.amumu.rule.tree.domain.model.RuleTreeParam;
 import org.amumu.rule.tree.infra.utils.JsonUtil;
 import org.apache.logging.log4j.util.Strings;
-
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 逻辑运算符表达式
+ */
 public class LogicOperator {
 
     static class AND {

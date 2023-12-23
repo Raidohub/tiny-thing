@@ -9,6 +9,7 @@ import org.amumu.rule.tree.infra.dao.model.RuleTreeDO;
 import org.amumu.rule.tree.infra.functions.ruletree.ConditionParser;
 import org.amumu.rule.tree.infra.functions.ruletree.path.Path;
 import org.amumu.rule.tree.infra.functions.ruletree.path.PathWrapper;
+import org.amumu.rule.tree.infra.utils.JsonUtil;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
@@ -44,7 +45,7 @@ public interface BeanMapper {
 
     @Named("condition2Str")
     default String condition2Str(RuleTreeConditionDomain conditionStr) {
-        return ConditionParser.convert2conditionStr(conditionStr);
+        return JsonUtil.obj2JsonStr(conditionStr);
     }
 
     @Named("root2root")

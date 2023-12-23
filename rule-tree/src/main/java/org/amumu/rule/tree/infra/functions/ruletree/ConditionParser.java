@@ -1,13 +1,15 @@
 package org.amumu.rule.tree.infra.functions.ruletree;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.amumu.rule.tree.client.RuleTreeEnum;
 import org.amumu.rule.tree.domain.RuleTreeConditionDomain;
 import org.amumu.rule.tree.domain.model.RuleTreeParam;
 import org.amumu.rule.tree.infra.utils.JsonUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
-
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.List;
@@ -15,13 +17,12 @@ import java.util.Map;
 import java.util.Optional;
 
 @Slf4j
+@Component
 public class ConditionParser {
 
+    @Getter
+    @Autowired
     private static PathChainFactory PATH_CHAIN_FACTORY;
-
-    public static void setPathChainFactory(PathChainFactory pathChainFactory) {
-        PATH_CHAIN_FACTORY = pathChainFactory;
-    }
 
     /**
      * 根据输入参数，执行表达式，返回结果
@@ -56,9 +57,7 @@ public class ConditionParser {
             return evaluate(subCondition, param);
         } else if (RuleTreeEnum.ENABLED.getName().equals(type)) {
             // 【开关】-返回开关的值【TRUE|FALSE]
-            boolean result = Boolean.parseBoolean(condition.getVal().get(0));
-            PATH_CHAIN_FACTORY.chainPath(null, condition, result);
-            return result;
+            return enableExpress(condition);
         } else if (RuleTreeEnum.LogicalOperationEnum.AND.getName().equals(type)) {
             return LogicOperator.AND.operator(condition.getConditions(), param);
         } else if (RuleTreeEnum.LogicalOperationEnum.OR.getName().equals(type)) {
@@ -66,56 +65,40 @@ public class ConditionParser {
         } else if (RuleTreeEnum.LogicalOperationEnum.NOT.getName().equals(type)) {
             return LogicOperator.NOT.operator(condition.getConditions(), param);
         }
-        return express(condition, param);
+        return operatorExpress(condition, param);
+    }
+
+    /**
+     * 执行开关表达式
+     * @param condition 表达式
+     * @return boolean
+     */
+    private static boolean enableExpress(RuleTreeConditionDomain condition) {
+        boolean result = Operator.enableExpress(condition);
+        PATH_CHAIN_FACTORY.next(null, condition, result);
+        return result;
     }
 
     /**
      * 执行表达式
      * @param condition 表达式
      * @param param 参数
-     * @return 表达式结果
+     * @return boolean
      */
-    private static boolean express(RuleTreeConditionDomain condition, RuleTreeParam param) {
-
+    private static boolean operatorExpress(RuleTreeConditionDomain condition, RuleTreeParam param) {
         String filed = condition.getField();
         String filedVal = retrieveFieldVal(param, filed);
         if (filedVal == null) {
             log.error("【{}】condition match retrieve【{}】return null", condition, filed);
-            PATH_CHAIN_FACTORY.chainPath(null, condition, false);
+            PATH_CHAIN_FACTORY.next(null, condition, false);
             return false;
         }
 
         String op = condition.getOp();
         List<String> valList = condition.getVal();
-        boolean result = doExpress(op, valList, filedVal);
-        PATH_CHAIN_FACTORY.chainPath(filedVal, condition, result);
+        boolean result = Operator.operatorExpress(op, valList, filedVal);
+        PATH_CHAIN_FACTORY.next(filedVal, condition, result);
         return result;
-    }
-
-    private static boolean doExpress(String op, List<String> valList, String filedVal) {
-        String val = valList.get(0);
-        if (RuleTreeEnum.OperatorEnum.EQ.getName().equals(op)) {
-            return val.equals(filedVal);
-        } else if (RuleTreeEnum.OperatorEnum.NEQ.getName().equals(op)) {
-            return !val.equals(filedVal);
-        } else if (RuleTreeEnum.OperatorEnum.LIKE.getName().equals(op)) {
-            return val.contains(filedVal);
-        } else if (RuleTreeEnum.OperatorEnum.NOT_LIKE.getName().equals(op)) {
-            return !val.contains(filedVal);
-        } else if (RuleTreeEnum.OperatorEnum.GT.getName().equals(op)) {
-            return filedVal.compareTo(val) > 0;
-        } else if (RuleTreeEnum.OperatorEnum.GTE.getName().equals(op)) {
-            return filedVal.compareTo(val) >= 0;
-        } else if (RuleTreeEnum.OperatorEnum.LT.getName().equals(op)) {
-            return filedVal.compareTo(val) < 0;
-        } else if (RuleTreeEnum.OperatorEnum.LET.getName().equals(op)) {
-            return filedVal.compareTo(val) <= 0;
-        } else if (RuleTreeEnum.OperatorEnum.IN.getName().equals(op)) {
-            return valList.contains(filedVal);
-        } else if (RuleTreeEnum.OperatorEnum.NOT_IN.getName().equals(op)) {
-            return !valList.contains(filedVal);
-        }
-        throw new UnsupportedOperationException("Unsupported operation: " + op);
     }
 
     /**
@@ -137,20 +120,6 @@ public class ConditionParser {
     }
 
     /**
-     * 解析为字符串
-     * @param condition 表达式条件对象
-     * @return 表达式字符串
-     */
-    public static String convert2conditionStr(RuleTreeConditionDomain condition) {
-        try {
-            return JsonUtil.obj2JsonStr(condition);
-        } catch (Exception e) {
-            log.error("【{}】 condition2Str error, err:【{}】", condition, e.getMessage());
-            return null;
-        }
-    }
-
-    /**
      * 解析为表达式条件对象对象
      * @param conditionStr 表达式
      * @return 表达式条件对象
@@ -166,9 +135,10 @@ public class ConditionParser {
 
     public static void main(String[] args) {
         PATH_CHAIN_FACTORY = new PathChainFactory();
-        JsonUtil.setPathChainFactory(new ObjectMapper());
+        JsonUtil.setOBJECT_MAPPER(new ObjectMapper());
         Map<String,String> map = new HashMap<>();
         map.put("threshold", "94");
+        map.put("itemId", "200");
         RuleTreeParam param = new RuleTreeParam();
         param.setExtra(map);
 
