@@ -19,5 +19,5 @@ public class Node {
     private Boolean result;
     private List<String> val;
     private Node son;
-    private List<Node> brothers;
+    private List<Node> sons;
 }

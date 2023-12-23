@@ -12,12 +12,15 @@ public class CustomConvertor {
             return null;
         }
         RuleTreeResultVO.RuleTreePathVO root = new RuleTreeResultVO.RuleTreePathVO();
-        root.setBrothers(node.getBrothers().stream()
+        root.setSons(node.getSons().stream()
                 .map(CustomConvertor::root2root).collect(Collectors.toList()));
-        root.setSon(root2root(node.getSon()));
+        root.setOp(node.getOp());
+        root.setPid(node.getPid());
+        root.setType(node.getType());
         root.setResult(node.getResult());
         root.setParam(node.getParam());
         root.setName(node.getName());
+        root.setVal(node.getVal());
         root.setId(node.getId());
         return root;
     }

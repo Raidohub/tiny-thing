@@ -20,7 +20,6 @@ public class RuleTreeResultVO {
         private String param;
         private Boolean result;
         private List<String> val;
-        private RuleTreePathVO son;
-        private List<RuleTreePathVO> brothers;
+        private List<RuleTreePathVO> sons;
     }
 }

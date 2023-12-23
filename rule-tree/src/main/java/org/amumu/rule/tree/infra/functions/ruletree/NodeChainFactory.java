@@ -16,21 +16,25 @@ public class NodeChainFactory {
     public final ThreadLocal<Node> curr = new ThreadLocal<>();
 
     public void setupChain(String param, RuleTreeConditionDomain condition, Boolean result) {
+        Node currNode = curr.get();
         Node newNode = this.buildNode(condition, param, result);
-        curr.get().setSon(newNode);
+        if (newNode.getPid().equals(currNode.getPid())) {
+            setupBrother(newNode);
+            curr.set(newNode);
+            return;
+        }
+        currNode.setSon(newNode);
         curr.set(newNode);
     }
 
-    public void setupBrother(String param, RuleTreeConditionDomain condition, Boolean result) {
-        List<Node> brothers = curr.get().getBrothers();
+    public void setupBrother(Node newNode) {
+        Node currNode = curr.get();
+        List<Node> brothers = curr.get().getSons();
         if (brothers == null) {
             brothers = new ArrayList<>();
-            curr.get().setBrothers(brothers);
+            currNode.setSons(brothers);
         }
-        Node brother = this.buildNode(condition, param, result);
-        brothers.add(brother);
-        curr.set(brother);
-
+        brothers.add(newNode);
     }
 
     public NodeWrapper buildNode(Boolean result, RuleTreeParam param) {
