@@ -6,9 +6,9 @@ import java.util.List;
 
 @Data
 public class RuleTreeResultVO {
+    private String param;
     private Boolean result;
     private RuleTreePathVO root;
-    private String param;
 
     @Data
     public static class RuleTreePathVO {
