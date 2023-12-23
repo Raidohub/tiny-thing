@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.amumu.rule.tree.client.RuleTreeEnum;
 import org.amumu.rule.tree.domain.RuleTreeConditionDomain;
 import org.amumu.rule.tree.domain.model.RuleTreeParam;
+import org.amumu.rule.tree.infra.config.json.JacksonConfig;
 import org.amumu.rule.tree.infra.utils.JsonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -32,10 +33,7 @@ public class ConditionParser {
      */
     public static Boolean parser(String conditionStr, RuleTreeParam param) {
         RuleTreeConditionDomain condition = JsonUtil.str2obj(conditionStr, RuleTreeConditionDomain.class);
-        String id = Optional.ofNullable(condition).map(RuleTreeConditionDomain::getId).orElse(null);
-        String name = Optional.ofNullable(condition).map(RuleTreeConditionDomain::getName).orElse(null);
-
-        NODE_CHAIN_FACTORY.initPath(id, name);
+        NODE_CHAIN_FACTORY.initPath(condition.getId(), condition.getName());
         return evaluate(condition, param);
     }
 
@@ -58,14 +56,27 @@ public class ConditionParser {
         } else if (RuleTreeEnum.ENABLED.getName().equals(type)) {
             // 【开关】-返回开关的值【TRUE|FALSE]
             return enableOperate(condition);
-        } else if (RuleTreeEnum.LogicalOperationEnum.AND.getName().equals(type)) {
+        } else if (RuleTreeEnum.LogicalOperationEnum.enumValueOf(type) != null) {
+            return logicOperate(condition, param, type);
+        }
+        return commonOperate(condition, param);
+    }
+
+    /**
+     * 逻辑运算
+     * @param condition 表达式
+     * @param param 参数
+     * @param type AND OR NOT
+     * @return boolean
+     */
+    private static boolean logicOperate(RuleTreeConditionDomain condition, RuleTreeParam param, String type) {
+        NODE_CHAIN_FACTORY.next(null, condition, null);
+        if (RuleTreeEnum.LogicalOperationEnum.AND.getName().equals(type)) {
             return LogicOperator.AND.operate(condition.getConditions(), param);
         } else if (RuleTreeEnum.LogicalOperationEnum.OR.getName().equals(type)) {
             return LogicOperator.OR.operate(condition.getConditions(), param);
-        } else if (RuleTreeEnum.LogicalOperationEnum.NOT.getName().equals(type)) {
-            return LogicOperator.NOT.operate(condition.getConditions(), param);
         }
-        return commonOperate(condition, param);
+        return LogicOperator.NOT.operate(condition.getConditions(), param);
     }
 
     /**
@@ -121,14 +132,14 @@ public class ConditionParser {
 
     public static void main(String[] args) {
         NODE_CHAIN_FACTORY = new NodeChainFactory();
-        JsonUtil.setOBJECT_MAPPER(new ObjectMapper());
+        JsonUtil.setOBJECT_MAPPER(new JacksonConfig().objectMapper());
         Map<String,String> map = new HashMap<>();
         map.put("threshold", "94");
         map.put("itemId", "200");
         RuleTreeParam param = new RuleTreeParam();
         param.setExtra(map);
 
-        String conditionJson = "{\"id\":\"-1\",\"name\":\"签证时效切流配置\",\"op\":null,\"val\":null,\"type\":\"condition\",\"conditions\":{\"id\":\"0\",\"name\":null,\"op\":null,\"val\":null,\"type\":\"and\",\"field\":null,\"conditions\":[{\"id\":\"1\",\"name\":\"xxxSwitch\",\"op\":null,\"val\":[\"true\"],\"type\":\"enabled\",\"field\":null,\"conditions\":null},{\"id\":\"2\",\"name\":null,\"op\":null,\"val\":null,\"type\":\"or\",\"field\":null,\"conditions\":[{\"id\":\"3\",\"name\":\"itemId\",\"op\":\"in\",\"val\":[\"2\",\"3\"],\"type\":\"int\",\"field\":\"itemId\",\"conditions\":null},{\"id\":\"4\",\"name\":null,\"op\":null,\"val\":null,\"type\":\"condition\",\"field\":null,\"conditions\":{\"id\":0,\"name\":null,\"op\":null,\"val\":null,\"type\":\"or\",\"field\":null,\"conditions\":[{\"name\":\"threshold\",\"id\":\"5\",\"op\":\"gte\",\"val\":[\"95\"],\"type\":\"int\",\"field\":\"threshold\",\"conditions\":null},{\"name\":\"isSeller\",\"id\":\"6\",\"op\":\"eq\",\"val\":[\"true\"],\"type\":\"boolean\",\"field\":\"isSeller\",\"conditions\":null}]}}]}]}}";
+        String conditionJson = "{\"id\":\"-1\",\"name\":\"签证时效切流配置\",\"op\":null,\"val\":null,\"type\":\"condition\",\"conditions\":{\"id\":\"0\",\"name\":null,\"op\":null,\"val\":null,\"type\":\"and\",\"field\":null,\"conditions\":[{\"id\":\"1\",\"name\":\"xxxSwitch\",\"op\":null,\"val\":[\"true\"],\"type\":\"enabled\",\"field\":null,\"conditions\":null},{\"id\":\"2\",\"name\":null,\"op\":null,\"val\":null,\"type\":\"or\",\"field\":null,\"conditions\":[{\"id\":\"3\",\"name\":\"itemId\",\"op\":\"in\",\"val\":[\"2\",\"3\"],\"type\":\"int\",\"field\":\"itemId\",\"conditions\":null},{\"id\":\"4\",\"name\":null,\"op\":null,\"val\":null,\"type\":\"or\",\"field\":null,\"conditions\":[{\"name\":\"threshold\",\"id\":\"5\",\"op\":\"gte\",\"val\":[\"95\"],\"type\":\"int\",\"field\":\"threshold\",\"conditions\":null},{\"name\":\"isSeller\",\"id\":\"6\",\"op\":\"eq\",\"val\":[\"true\"],\"type\":\"boolean\",\"field\":\"isSeller\",\"conditions\":null}]}]}]}}";
         boolean result = ConditionParser.parser(conditionJson, param);
         System.out.println("evaluate result: " + result);
         System.out.println("evaluate path: ");

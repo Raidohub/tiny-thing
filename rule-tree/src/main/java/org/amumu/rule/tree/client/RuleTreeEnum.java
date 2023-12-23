@@ -1,5 +1,7 @@
 package org.amumu.rule.tree.client;
 
+import java.util.Arrays;
+
 public enum RuleTreeEnum {
 
     CONDITION("condition"),
@@ -49,6 +51,16 @@ public enum RuleTreeEnum {
 
         public String getName() {
             return name;
+        }
+
+        public static LogicalOperationEnum enumValueOf(String name) {
+            LogicalOperationEnum[] enums = LogicalOperationEnum.values();
+            for(LogicalOperationEnum enumTmp : enums){
+                if(enumTmp.getName().equals(name)){
+                    return enumTmp;
+                }
+            }
+            return null;
         }
     }
 }
