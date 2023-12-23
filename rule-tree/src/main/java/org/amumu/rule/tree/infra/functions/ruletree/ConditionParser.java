@@ -57,7 +57,7 @@ public class ConditionParser {
             return evaluate(subCondition, param);
         } else if (RuleTreeEnum.ENABLED.getName().equals(type)) {
             // 【开关】-返回开关的值【TRUE|FALSE]
-            return enableExpress(condition);
+            return enableOperate(condition);
         } else if (RuleTreeEnum.LogicalOperationEnum.AND.getName().equals(type)) {
             return LogicOperator.AND.operate(condition.getConditions(), param);
         } else if (RuleTreeEnum.LogicalOperationEnum.OR.getName().equals(type)) {
@@ -65,7 +65,7 @@ public class ConditionParser {
         } else if (RuleTreeEnum.LogicalOperationEnum.NOT.getName().equals(type)) {
             return LogicOperator.NOT.operate(condition.getConditions(), param);
         }
-        return operatorExpress(condition, param);
+        return commonOperate(condition, param);
     }
 
     /**
@@ -73,7 +73,7 @@ public class ConditionParser {
      * @param condition 表达式
      * @return boolean
      */
-    private static boolean enableExpress(RuleTreeConditionDomain condition) {
+    private static boolean enableOperate(RuleTreeConditionDomain condition) {
         boolean result = Operator.enableOperate(condition);
         NODE_CHAIN_FACTORY.next(null, condition, result);
         return result;
@@ -85,7 +85,7 @@ public class ConditionParser {
      * @param param 参数
      * @return boolean
      */
-    private static boolean operatorExpress(RuleTreeConditionDomain condition, RuleTreeParam param) {
+    private static boolean commonOperate(RuleTreeConditionDomain condition, RuleTreeParam param) {
         String filed = condition.getField();
         String filedVal = retrieveFieldVal(param, filed);
         if (filedVal == null) {
