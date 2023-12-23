@@ -1,6 +1,7 @@
 package org.amumu.rule.tree.infra.functions.ruletree.node;
 
 import lombok.Data;
+
 import java.util.List;
 
 /**
@@ -17,7 +18,6 @@ public class Node {
     private String param;
     private Boolean result;
     private List<String> val;
-//    @JsonIgnore
-    private Node next;
+    private Node son;
     private List<Node> brothers;
 }

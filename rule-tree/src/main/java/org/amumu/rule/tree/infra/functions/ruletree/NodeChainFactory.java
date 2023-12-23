@@ -17,7 +17,7 @@ public class NodeChainFactory {
 
     public void setupChain(String param, RuleTreeConditionDomain condition, Boolean result) {
         Node newNode = this.buildNode(condition, param, result);
-        curr.get().setNext(newNode);
+        curr.get().setSon(newNode);
         curr.set(newNode);
     }
 
@@ -43,11 +43,7 @@ public class NodeChainFactory {
     }
 
     public void printPath() {
-        Node root = this.root.get();
-        if (root != null) {
-            System.out.println(JsonUtil.obj2JsonStr(root));
-            root = root.getNext();
-        }
+        System.out.println(JsonUtil.obj2JsonStr(this.root.get()));
         this.clear();
     }
 

@@ -16,7 +16,7 @@ public class RuleTreeResultVO {
         private String name;
         private String param;
         private Boolean result;
-        private RuleTreePathVO next;
+        private RuleTreePathVO son;
         private List<RuleTreePathVO> brothers;
     }
 }
