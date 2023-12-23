@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 import org.amumu.rule.tree.client.model.req.RuleTreeReq;
 import org.amumu.rule.tree.infra.functions.ruletree.ConditionParser;
+import org.amumu.rule.tree.infra.utils.JsonUtil;
 
 import java.util.Date;
 
@@ -29,6 +30,6 @@ public class RuleTreeDomain {
 
     public void upgrade(RuleTreeReq ruleTreeReq) {
         this.version = this.version+1;
-        this.condition = ConditionParser.convert2Condition(ruleTreeReq.getCondition());
+        this.condition = JsonUtil.str2obj(ruleTreeReq.getCondition(), RuleTreeConditionDomain.class);
     }
 }

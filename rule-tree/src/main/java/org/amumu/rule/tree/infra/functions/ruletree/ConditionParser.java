@@ -31,7 +31,7 @@ public class ConditionParser {
      * @return 表达式结果
      */
     public static Boolean parser(String conditionStr, RuleTreeParam param) {
-        RuleTreeConditionDomain condition = convert2Condition(conditionStr);
+        RuleTreeConditionDomain condition = JsonUtil.str2obj(conditionStr, RuleTreeConditionDomain.class);
         String id = Optional.ofNullable(condition).map(RuleTreeConditionDomain::getId).orElse(null);
         String name = Optional.ofNullable(condition).map(RuleTreeConditionDomain::getName).orElse(null);
 
@@ -117,20 +117,6 @@ public class ConditionParser {
         return Optional.ofNullable(ReflectionUtils.findField(param.getClass(), fieldName))
                 .map(Field::toString)
                 .orElse(null);
-    }
-
-    /**
-     * 解析为表达式条件对象对象
-     * @param conditionStr 表达式
-     * @return 表达式条件对象
-     */
-    public static RuleTreeConditionDomain convert2Condition(String conditionStr) {
-        try {
-            return JsonUtil.str2obj(conditionStr, RuleTreeConditionDomain.class);
-        } catch (Exception e) {
-            log.error("【{}】str2Condition error, err:【{}】", conditionStr, e.getMessage());
-            return null;
-        }
     }
 
     public static void main(String[] args) {

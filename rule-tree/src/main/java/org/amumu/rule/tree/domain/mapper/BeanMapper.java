@@ -40,7 +40,7 @@ public interface BeanMapper {
 
     @Named("str2Condition")
     default RuleTreeConditionDomain str2Condition(String condition) {
-        return ConditionParser.convert2Condition(condition);
+        return JsonUtil.str2obj(condition, RuleTreeConditionDomain.class);
     }
 
     @Named("condition2Str")
