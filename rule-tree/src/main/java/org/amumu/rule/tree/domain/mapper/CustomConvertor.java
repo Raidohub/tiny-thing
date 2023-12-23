@@ -14,7 +14,7 @@ public class CustomConvertor {
         RuleTreeResultVO.RuleTreePathVO root = new RuleTreeResultVO.RuleTreePathVO();
         root.setBrothers(node.getBrothers().stream()
                 .map(CustomConvertor::root2root).collect(Collectors.toList()));
-        root.setNext(root2root(node.getNext()));
+        root.setSon(root2root(node.getSon()));
         root.setResult(node.getResult());
         root.setParam(node.getParam());
         root.setName(node.getName());

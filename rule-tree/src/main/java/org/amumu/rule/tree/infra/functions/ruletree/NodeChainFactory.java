@@ -36,10 +36,10 @@ public class NodeChainFactory {
         return node;
     }
 
-    public void next(String param, RuleTreeConditionDomain condition, Boolean result) {
-        Node next = this.buildNode(condition, param, result);
-        curr.get().setNext(next);
-        curr.set(next);
+    public void setupSon(String param, RuleTreeConditionDomain condition, Boolean result) {
+        Node son = this.buildNode(condition, param, result);
+        curr.get().setSon(son);
+        curr.set(son);
     }
 
     public void brother(String param, RuleTreeConditionDomain condition, Boolean result) {
@@ -67,7 +67,7 @@ public class NodeChainFactory {
         Node root = this.root.get();
         while (root != null) {
             System.out.println(JsonUtil.obj2JsonStr(root));
-            root = root.getNext();
+            root = root.getSon();
         }
         this.clear();
     }

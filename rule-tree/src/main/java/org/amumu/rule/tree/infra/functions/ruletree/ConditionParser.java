@@ -69,7 +69,7 @@ public class ConditionParser {
      * @return boolean
      */
     private static boolean logicOperate(RuleTreeConditionDomain condition, RuleTreeParam param, String type) {
-        NODE_CHAIN_FACTORY.next(null, condition, null);
+        NODE_CHAIN_FACTORY.setupSon(null, condition, null);
         if (RuleTreeEnum.LogicalOperationEnum.AND.getName().equals(type)) {
             return LogicOperator.AND.operate(condition.getConditions(), param);
         } else if (RuleTreeEnum.LogicalOperationEnum.OR.getName().equals(type)) {
@@ -85,7 +85,7 @@ public class ConditionParser {
      */
     private static boolean enableOperate(RuleTreeConditionDomain condition) {
         boolean result = Operator.enableOperate(condition);
-        NODE_CHAIN_FACTORY.next(null, condition, result);
+        NODE_CHAIN_FACTORY.setupSon(null, condition, result);
         return result;
     }
 
@@ -100,14 +100,14 @@ public class ConditionParser {
         String filedVal = retrieveFieldVal(param, filed);
         if (filedVal == null) {
             log.error("【{}】condition match retrieve【{}】return null", condition, filed);
-            NODE_CHAIN_FACTORY.next(null, condition, false);
+            NODE_CHAIN_FACTORY.setupSon(null, condition, false);
             return false;
         }
 
         String op = condition.getOp();
         List<String> valList = condition.getVal();
         boolean result = Operator.commonOperate(op, valList, filedVal);
-        NODE_CHAIN_FACTORY.next(filedVal, condition, result);
+        NODE_CHAIN_FACTORY.setupSon(filedVal, condition, result);
         return result;
     }
 

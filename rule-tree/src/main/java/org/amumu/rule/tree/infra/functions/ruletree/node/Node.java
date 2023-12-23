@@ -18,6 +18,6 @@ public class Node {
     private Boolean result;
     private List<String> val;
     @JsonIgnore
-    private Node next;
+    private Node son;
     private List<Node> brothers;
 }
