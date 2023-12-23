@@ -15,27 +15,6 @@ public class NodeChainFactory {
     public final ThreadLocal<Node> root = new ThreadLocal<>();
     public final ThreadLocal<Node> curr = new ThreadLocal<>();
 
-    public void initPath(String id, String name) {
-        Node root = new Node();
-        root.setId(id);
-        root.setName(name);
-        this.root.set(root);
-        this.curr.set(root);
-    }
-
-    private Node buildNode(RuleTreeConditionDomain condition, String param, Boolean result) {
-        Node node = new Node();
-        node.setResult(result);
-        node.setParam(param);
-
-        node.setName(condition.getName());
-        node.setType(condition.getType());
-        node.setVal(condition.getVal());
-        node.setId(condition.getId());
-        node.setOp(condition.getOp());
-        return node;
-    }
-
     public void setupSon(String param, RuleTreeConditionDomain condition, Boolean result) {
         Node son = this.buildNode(condition, param, result);
         curr.get().setSon(son);
@@ -54,9 +33,9 @@ public class NodeChainFactory {
 
     }
 
-    public NodeWrapper buildRuleTreeNode(Boolean result, RuleTreeParam ruleTreeParam) {
+    public NodeWrapper buildNode(Boolean result, RuleTreeParam param) {
         NodeWrapper nodeWrapper = new NodeWrapper();
-        nodeWrapper.setParam(JsonUtil.obj2JsonStr(ruleTreeParam));
+        nodeWrapper.setParam(JsonUtil.obj2JsonStr(param));
         nodeWrapper.setRoot(root.get());
         nodeWrapper.setResult(result);
         this.clear();
@@ -77,4 +56,24 @@ public class NodeChainFactory {
         this.curr.remove();
     }
 
+    public void initPath(String id, String name) {
+        Node root = new Node();
+        root.setId(id);
+        root.setName(name);
+        this.root.set(root);
+        this.curr.set(root);
+    }
+
+    private Node buildNode(RuleTreeConditionDomain condition, String param, Boolean result) {
+        Node node = new Node();
+        node.setResult(result);
+        node.setParam(param);
+
+        node.setName(condition.getName());
+        node.setType(condition.getType());
+        node.setVal(condition.getVal());
+        node.setId(condition.getId());
+        node.setOp(condition.getOp());
+        return node;
+    }
 }

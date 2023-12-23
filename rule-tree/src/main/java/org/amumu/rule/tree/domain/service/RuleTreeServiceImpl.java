@@ -82,7 +82,7 @@ public class RuleTreeServiceImpl implements RuleTreeService {
                     paramReq.setCondition(ruleTreeDO.getCondition());
                     return this.doParser(paramReq);
                 });
-        NodeWrapper nodeWrapper = nodeChainFactory.buildRuleTreeNode(result, paramReq);
+        NodeWrapper nodeWrapper = nodeChainFactory.buildNode(result, paramReq);
         return BeanMapper.RULE_TREE_INSTANCE.convertRuleTreePath(nodeWrapper);
     }
 
