@@ -19,7 +19,7 @@ public class NodeChainFactory {
         Node currNode = curr.get();
         Node newNode = this.buildNode(condition, param, result);
         if (newNode.getPid().equals(currNode.getPid())) {
-            setupBrother(newNode);
+            setupSons(newNode);
             curr.set(newNode);
             return;
         }
@@ -27,7 +27,7 @@ public class NodeChainFactory {
         curr.set(newNode);
     }
 
-    public void setupBrother(Node newNode) {
+    public void setupSons(Node newNode) {
         Node currNode = curr.get();
         List<Node> brothers = curr.get().getSons();
         if (brothers == null) {
