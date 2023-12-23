@@ -10,8 +10,8 @@ import org.amumu.rule.tree.domain.mapper.BeanMapper;
 import org.amumu.rule.tree.domain.repo.RuleTreeRepoService;
 import org.amumu.rule.tree.infra.dao.model.RuleTreeDO;
 import org.amumu.rule.tree.infra.functions.ruletree.ConditionParser;
-import org.amumu.rule.tree.infra.functions.ruletree.PathChainFactory;
-import org.amumu.rule.tree.infra.functions.ruletree.path.PathWrapper;
+import org.amumu.rule.tree.infra.functions.ruletree.NodeChainFactory;
+import org.amumu.rule.tree.infra.functions.ruletree.node.NodeWrapper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,7 +25,7 @@ import java.util.Optional;
 public class RuleTreeServiceImpl implements RuleTreeService {
 
     @Autowired
-    private PathChainFactory pathChainFactory;
+    private NodeChainFactory nodeChainFactory;
 
     @Autowired
     private RuleTreeRepoService ruleTreeRepoService;
@@ -82,8 +82,8 @@ public class RuleTreeServiceImpl implements RuleTreeService {
                     paramReq.setCondition(ruleTreeDO.getCondition());
                     return this.doParser(paramReq);
                 });
-        PathWrapper pathWrapper = pathChainFactory.buildRuleTreePath(result, paramReq);
-        return BeanMapper.RULE_TREE_INSTANCE.convertRuleTreePath(pathWrapper);
+        NodeWrapper nodeWrapper = nodeChainFactory.buildRuleTreeNode(result, paramReq);
+        return BeanMapper.RULE_TREE_INSTANCE.convertRuleTreePath(nodeWrapper);
     }
 
     private boolean doParser(RuleTreeParamReq paramReq) {

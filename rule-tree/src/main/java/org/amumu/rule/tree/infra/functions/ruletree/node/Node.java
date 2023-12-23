@@ -1,4 +1,4 @@
-package org.amumu.rule.tree.infra.functions.ruletree.path;
+package org.amumu.rule.tree.infra.functions.ruletree.node;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
@@ -8,7 +8,7 @@ import java.util.List;
  * 规则执行路径
  */
 @Data
-public class Path {
+public class Node {
 
     private String id;
     private String op;
@@ -18,6 +18,6 @@ public class Path {
     private Boolean result;
     private List<String> val;
     @JsonIgnore
-    private Path next;
-    private List<Path> brothers;
+    private Node next;
+    private List<Node> brothers;
 }

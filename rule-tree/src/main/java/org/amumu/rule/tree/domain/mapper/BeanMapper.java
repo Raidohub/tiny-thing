@@ -6,9 +6,8 @@ import org.amumu.rule.tree.client.model.res.RuleTreeVO;
 import org.amumu.rule.tree.domain.RuleTreeConditionDomain;
 import org.amumu.rule.tree.domain.RuleTreeDomain;
 import org.amumu.rule.tree.infra.dao.model.RuleTreeDO;
-import org.amumu.rule.tree.infra.functions.ruletree.ConditionParser;
-import org.amumu.rule.tree.infra.functions.ruletree.path.Path;
-import org.amumu.rule.tree.infra.functions.ruletree.path.PathWrapper;
+import org.amumu.rule.tree.infra.functions.ruletree.node.Node;
+import org.amumu.rule.tree.infra.functions.ruletree.node.NodeWrapper;
 import org.amumu.rule.tree.infra.utils.JsonUtil;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -36,7 +35,7 @@ public interface BeanMapper {
     List<RuleTreeVO> domain2VO(List<RuleTreeDomain> ruleTreeDomain);
 
     @Mapping(source = "root", target = "root", qualifiedByName = "root2root")
-    RuleTreeResultVO convertRuleTreePath(PathWrapper wrapper);
+    RuleTreeResultVO convertRuleTreePath(NodeWrapper wrapper);
 
     @Named("str2Condition")
     default RuleTreeConditionDomain str2Condition(String condition) {
@@ -49,7 +48,7 @@ public interface BeanMapper {
     }
 
     @Named("root2root")
-    default RuleTreeResultVO.RuleTreePathVO root2root(Path path) {
-        return CustomConvertor.root2root(path);
+    default RuleTreeResultVO.RuleTreePathVO root2root(Node node) {
+        return CustomConvertor.root2root(node);
     }
 }

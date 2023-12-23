@@ -22,7 +22,7 @@ public class ConditionParser {
 
     @Getter
     @Autowired
-    private static PathChainFactory PATH_CHAIN_FACTORY;
+    private static NodeChainFactory NODE_CHAIN_FACTORY;
 
     /**
      * 根据输入参数，执行表达式，返回结果
@@ -35,7 +35,7 @@ public class ConditionParser {
         String id = Optional.ofNullable(condition).map(RuleTreeConditionDomain::getId).orElse(null);
         String name = Optional.ofNullable(condition).map(RuleTreeConditionDomain::getName).orElse(null);
 
-        PATH_CHAIN_FACTORY.initPath(id, name);
+        NODE_CHAIN_FACTORY.initPath(id, name);
         return evaluate(condition, param);
     }
 
@@ -75,7 +75,7 @@ public class ConditionParser {
      */
     private static boolean enableExpress(RuleTreeConditionDomain condition) {
         boolean result = Operator.enableExpress(condition);
-        PATH_CHAIN_FACTORY.next(null, condition, result);
+        NODE_CHAIN_FACTORY.next(null, condition, result);
         return result;
     }
 
@@ -90,14 +90,14 @@ public class ConditionParser {
         String filedVal = retrieveFieldVal(param, filed);
         if (filedVal == null) {
             log.error("【{}】condition match retrieve【{}】return null", condition, filed);
-            PATH_CHAIN_FACTORY.next(null, condition, false);
+            NODE_CHAIN_FACTORY.next(null, condition, false);
             return false;
         }
 
         String op = condition.getOp();
         List<String> valList = condition.getVal();
         boolean result = Operator.operatorExpress(op, valList, filedVal);
-        PATH_CHAIN_FACTORY.next(filedVal, condition, result);
+        NODE_CHAIN_FACTORY.next(filedVal, condition, result);
         return result;
     }
 
@@ -120,7 +120,7 @@ public class ConditionParser {
     }
 
     public static void main(String[] args) {
-        PATH_CHAIN_FACTORY = new PathChainFactory();
+        NODE_CHAIN_FACTORY = new NodeChainFactory();
         JsonUtil.setOBJECT_MAPPER(new ObjectMapper());
         Map<String,String> map = new HashMap<>();
         map.put("threshold", "94");
@@ -132,6 +132,6 @@ public class ConditionParser {
         boolean result = ConditionParser.parser(conditionJson, param);
         System.out.println("evaluate result: " + result);
         System.out.println("evaluate path: ");
-        PATH_CHAIN_FACTORY.printPath();
+        NODE_CHAIN_FACTORY.printPath();
     }
 }
