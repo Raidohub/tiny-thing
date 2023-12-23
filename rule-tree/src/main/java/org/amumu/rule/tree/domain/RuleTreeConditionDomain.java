@@ -9,6 +9,7 @@ import java.util.List;
 public class RuleTreeConditionDomain {
 
     private String id;
+    private String pid;
     private String name;
     private String type;
     private String field;

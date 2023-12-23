@@ -69,7 +69,7 @@ public class ConditionParser {
      * @return boolean
      */
     private static boolean logicOperate(RuleTreeConditionDomain condition, RuleTreeParam param, String type) {
-        NODE_CHAIN_FACTORY.setupSon(null, condition, null);
+        NODE_CHAIN_FACTORY.setupChain(null, condition, null);
         if (RuleTreeEnum.LogicalOperationEnum.AND.getName().equals(type)) {
             return LogicOperator.AND.operate(condition.getConditions(), param);
         } else if (RuleTreeEnum.LogicalOperationEnum.OR.getName().equals(type)) {
@@ -85,7 +85,7 @@ public class ConditionParser {
      */
     private static boolean enableOperate(RuleTreeConditionDomain condition) {
         boolean result = Operator.enableOperate(condition);
-        NODE_CHAIN_FACTORY.setupSon(null, condition, result);
+        NODE_CHAIN_FACTORY.setupChain(null, condition, result);
         return result;
     }
 
@@ -100,14 +100,14 @@ public class ConditionParser {
         String filedVal = retrieveFieldVal(param, filed);
         if (filedVal == null) {
             log.error("【{}】condition match retrieve【{}】return null", condition, filed);
-            NODE_CHAIN_FACTORY.setupSon(null, condition, false);
+            NODE_CHAIN_FACTORY.setupChain(null, condition, false);
             return false;
         }
 
         String op = condition.getOp();
         List<String> valList = condition.getVal();
         boolean result = Operator.commonOperate(op, valList, filedVal);
-        NODE_CHAIN_FACTORY.setupSon(filedVal, condition, result);
+        NODE_CHAIN_FACTORY.setupChain(filedVal, condition, result);
         return result;
     }
 
@@ -138,7 +138,7 @@ public class ConditionParser {
         RuleTreeParam param = new RuleTreeParam();
         param.setExtra(map);
 
-        String conditionJson = "{\"id\":\"-1\",\"name\":\"签证时效切流配置\",\"op\":null,\"val\":null,\"type\":\"condition\",\"conditions\":{\"id\":\"0\",\"name\":null,\"op\":null,\"val\":null,\"type\":\"and\",\"field\":null,\"conditions\":[{\"id\":\"1\",\"name\":\"xxxSwitch\",\"op\":null,\"val\":[\"true\"],\"type\":\"enabled\",\"field\":null,\"conditions\":null},{\"id\":\"2\",\"name\":null,\"op\":null,\"val\":null,\"type\":\"or\",\"field\":null,\"conditions\":[{\"id\":\"3\",\"name\":\"itemId\",\"op\":\"in\",\"val\":[\"2\",\"3\"],\"type\":\"int\",\"field\":\"itemId\",\"conditions\":null},{\"id\":\"4\",\"name\":null,\"op\":null,\"val\":null,\"type\":\"or\",\"field\":null,\"conditions\":[{\"name\":\"threshold\",\"id\":\"5\",\"op\":\"gte\",\"val\":[\"95\"],\"type\":\"int\",\"field\":\"threshold\",\"conditions\":null},{\"name\":\"isSeller\",\"id\":\"6\",\"op\":\"eq\",\"val\":[\"true\"],\"type\":\"boolean\",\"field\":\"isSeller\",\"conditions\":null}]}]}]}}";
+        String conditionJson = "{\"id\":\"-1\",\"name\":\"签证时效切流配置\",\"op\":null,\"val\":null,\"type\":\"condition\",\"conditions\":{\"id\":\"0\",\"pid\":\"-1\",\"name\":null,\"op\":null,\"val\":null,\"type\":\"and\",\"field\":null,\"conditions\":[{\"id\":\"1\",\"pid\":\"0\",\"name\":null,\"op\":null,\"val\":null,\"type\":\"or\",\"field\":null,\"conditions\":[{\"id\":\"10\",\"pid\":\"1\",\"name\":\"Switch\",\"op\":null,\"val\":[\"false\"],\"type\":\"enabled\",\"field\":null,\"conditions\":null},{\"id\":\"11\",\"pid\":\"1\",\"name\":null,\"op\":null,\"val\":null,\"type\":\"or\",\"field\":null,\"conditions\":[{\"id\":\"110\",\"pid\":\"11\",\"name\":\"buyerId\",\"op\":null,\"val\":[\"20\"],\"type\":\"enabled\",\"field\":null,\"conditions\":null},{\"id\":\"111\",\"pid\":\"11\",\"name\":\"Switch\",\"op\":null,\"val\":[\"true\"],\"type\":\"enabled\",\"field\":null,\"conditions\":null}]}]},{\"id\":\"2\",\"pid\":\"0\",\"name\":null,\"op\":null,\"val\":null,\"type\":\"or\",\"field\":null,\"conditions\":[{\"id\":\"3\",\"pid\":\"2\",\"name\":\"itemId\",\"op\":\"in\",\"val\":[\"2\",\"3\"],\"type\":\"int\",\"field\":\"itemId\",\"conditions\":null},{\"id\":\"4\",\"pid\":\"2\",\"name\":null,\"op\":null,\"val\":null,\"type\":\"or\",\"field\":null,\"conditions\":[{\"id\":\"5\",\"pid\":\"4\",\"name\":\"threshold\",\"op\":\"gte\",\"val\":[\"95\"],\"type\":\"int\",\"field\":\"threshold\",\"conditions\":null},{\"id\":\"6\",\"pid\":\"4\",\"name\":\"isSeller\",\"op\":\"eq\",\"val\":[\"true\"],\"type\":\"boolean\",\"field\":\"isSeller\",\"conditions\":null}]}]}]}}";
         boolean result = ConditionParser.parser(conditionJson, param);
         System.out.println("evaluate result: " + result);
         System.out.println("evaluate path: ");

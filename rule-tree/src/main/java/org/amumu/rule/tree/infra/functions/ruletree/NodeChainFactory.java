@@ -15,10 +15,10 @@ public class NodeChainFactory {
     public final ThreadLocal<Node> root = new ThreadLocal<>();
     public final ThreadLocal<Node> curr = new ThreadLocal<>();
 
-    public void setupSon(String param, RuleTreeConditionDomain condition, Boolean result) {
-        Node son = this.buildNode(condition, param, result);
-        curr.get().setSon(son);
-        curr.set(son);
+    public void setupChain(String param, RuleTreeConditionDomain condition, Boolean result) {
+        Node newNode = this.buildNode(condition, param, result);
+        curr.get().setNext(newNode);
+        curr.set(newNode);
     }
 
     public void setupBrother(String param, RuleTreeConditionDomain condition, Boolean result) {
@@ -44,9 +44,9 @@ public class NodeChainFactory {
 
     public void printPath() {
         Node root = this.root.get();
-        while (root != null) {
+        if (root != null) {
             System.out.println(JsonUtil.obj2JsonStr(root));
-            root = root.getSon();
+            root = root.getNext();
         }
         this.clear();
     }
@@ -72,6 +72,7 @@ public class NodeChainFactory {
         node.setName(condition.getName());
         node.setType(condition.getType());
         node.setVal(condition.getVal());
+        node.setPid(condition.getPid());
         node.setId(condition.getId());
         node.setOp(condition.getOp());
         return node;
