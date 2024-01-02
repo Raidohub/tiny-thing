@@ -1,6 +1,5 @@
 package org.amumu.rule.tree.infra.functions.ruletree;
 
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.amumu.rule.tree.client.RuleTreeEnum;
 import org.amumu.rule.tree.domain.RuleTreeConditionDomain;
@@ -10,6 +9,7 @@ import org.amumu.rule.tree.infra.utils.JsonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
+
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.List;
@@ -20,7 +20,6 @@ import java.util.Optional;
 @Component
 public class ConditionParser {
 
-    @Getter
     @Autowired
     private static NodeChainFactory NODE_CHAIN_FACTORY;
 
@@ -50,7 +49,7 @@ public class ConditionParser {
         String type = condition.getType();
         if (RuleTreeEnum.CONDITION.getName().equals(type)) {
             RuleTreeConditionDomain subCondition = JsonUtil.jsonNode2obj(condition.getConditions(), RuleTreeConditionDomain.class);
-            // 【条件】
+            // 【获取子条件】
             return evaluate(subCondition, param);
         } else if (RuleTreeEnum.ENABLED.getName().equals(type)) {
             // 【开关】-返回开关的值【TRUE|FALSE]
@@ -69,7 +68,8 @@ public class ConditionParser {
      * @return boolean
      */
     private static boolean logicOperate(RuleTreeConditionDomain condition, RuleTreeParam param, String type) {
-        NODE_CHAIN_FACTORY.setupChain(null, condition, null);
+        NODE_CHAIN_FACTORY.inChain(null, condition, null);
+        NODE_CHAIN_FACTORY.setupBacktracePoint();
         if (RuleTreeEnum.LogicalOperationEnum.AND.getName().equals(type)) {
             return LogicOperator.AND.operate(condition.getConditions(), param);
         } else if (RuleTreeEnum.LogicalOperationEnum.OR.getName().equals(type)) {
@@ -85,7 +85,7 @@ public class ConditionParser {
      */
     private static boolean enableOperate(RuleTreeConditionDomain condition) {
         boolean result = ArithmeticOperator.enableOperate(condition);
-        NODE_CHAIN_FACTORY.setupChain(null, condition, result);
+        NODE_CHAIN_FACTORY.inChain(null, condition, result);
         return result;
     }
 
@@ -100,14 +100,14 @@ public class ConditionParser {
         String filedVal = retrieveFieldVal(param, filed);
         if (filedVal == null) {
             log.error("【{}】condition match retrieve【{}】return null", condition, filed);
-            NODE_CHAIN_FACTORY.setupChain(null, condition, false);
+            NODE_CHAIN_FACTORY.inChain(null, condition, false);
             return false;
         }
 
         String op = condition.getOp();
         List<String> valList = condition.getVal();
         boolean result = ArithmeticOperator.commonOperate(op, valList, filedVal);
-        NODE_CHAIN_FACTORY.setupChain(filedVal, condition, result);
+        NODE_CHAIN_FACTORY.inChain(filedVal, condition, result);
         return result;
     }
 
@@ -132,13 +132,149 @@ public class ConditionParser {
     public static void main(String[] args) {
         NODE_CHAIN_FACTORY = new NodeChainFactory();
         JsonUtil.setOBJECT_MAPPER(new JacksonConfig().objectMapper());
+        LogicOperator.setNODE_CHAIN_FACTORY(NODE_CHAIN_FACTORY);
         Map<String,String> map = new HashMap<>();
         map.put("threshold", "94");
         map.put("itemId", "200");
         RuleTreeParam param = new RuleTreeParam();
         param.setExtra(map);
 
-        String conditionJson = "{\"id\":\"-1\",\"name\":\"签证时效切流配置\",\"op\":null,\"val\":null,\"type\":\"condition\",\"conditions\":{\"id\":\"0\",\"pid\":\"-1\",\"name\":null,\"op\":null,\"val\":null,\"type\":\"and\",\"field\":null,\"conditions\":[{\"id\":\"1\",\"pid\":\"0\",\"name\":null,\"op\":null,\"val\":null,\"type\":\"or\",\"field\":null,\"conditions\":[{\"id\":\"10\",\"pid\":\"1\",\"name\":\"Switch\",\"op\":null,\"val\":[\"false\"],\"type\":\"enabled\",\"field\":null,\"conditions\":null},{\"id\":\"11\",\"pid\":\"1\",\"name\":null,\"op\":null,\"val\":null,\"type\":\"or\",\"field\":null,\"conditions\":[{\"id\":\"110\",\"pid\":\"11\",\"name\":\"buyerId\",\"op\":null,\"val\":[\"20\"],\"type\":\"enabled\",\"field\":null,\"conditions\":null},{\"id\":\"111\",\"pid\":\"11\",\"name\":\"Switch\",\"op\":null,\"val\":[\"true\"],\"type\":\"enabled\",\"field\":null,\"conditions\":null}]}]},{\"id\":\"2\",\"pid\":\"0\",\"name\":null,\"op\":null,\"val\":null,\"type\":\"or\",\"field\":null,\"conditions\":[{\"id\":\"3\",\"pid\":\"2\",\"name\":\"itemId\",\"op\":\"in\",\"val\":[\"2\",\"3\"],\"type\":\"int\",\"field\":\"itemId\",\"conditions\":null},{\"id\":\"4\",\"pid\":\"2\",\"name\":null,\"op\":null,\"val\":null,\"type\":\"or\",\"field\":null,\"conditions\":[{\"id\":\"5\",\"pid\":\"4\",\"name\":\"threshold\",\"op\":\"gte\",\"val\":[\"95\"],\"type\":\"int\",\"field\":\"threshold\",\"conditions\":null},{\"id\":\"6\",\"pid\":\"4\",\"name\":\"isSeller\",\"op\":\"eq\",\"val\":[\"true\"],\"type\":\"boolean\",\"field\":\"isSeller\",\"conditions\":null}]}]}]}}";
+        String conditionJson = "{\n" +
+                "    \"id\": \"-1\",\n" +
+                "    \"name\": \"签证时效切流配置\",\n" +
+                "    \"op\": null,\n" +
+                "    \"val\": null,\n" +
+                "    \"type\": \"condition\",\n" +
+                "    \"conditions\":\n" +
+                "    {\n" +
+                "        \"id\": \"0\",\n" +
+                "        \"name\": null,\n" +
+                "        \"op\": null,\n" +
+                "        \"val\": null,\n" +
+                "        \"type\": \"and\",\n" +
+                "        \"field\": null,\n" +
+                "        \"conditions\":\n" +
+                "        [\n" +
+                "            {\n" +
+                "                \"id\": \"1\",\n" +
+                "                \"name\": null,\n" +
+                "                \"op\": null,\n" +
+                "                \"val\": null,\n" +
+                "                \"type\": \"or\",\n" +
+                "                \"field\": null,\n" +
+                "                \"conditions\":\n" +
+                "                [\n" +
+                "                    {\n" +
+                "                        \"id\": \"10\",\n" +
+                "                        \"name\": \"Switch\",\n" +
+                "                        \"op\": null,\n" +
+                "                        \"val\":\n" +
+                "                        [\n" +
+                "                            \"false\"\n" +
+                "                        ],\n" +
+                "                        \"type\": \"enabled\",\n" +
+                "                        \"field\": null,\n" +
+                "                        \"conditions\": null\n" +
+                "                    },\n" +
+                "                    {\n" +
+                "\t\t                \"id\": \"11\",\n" +
+                "\t\t                \"name\": null,\n" +
+                "\t\t                \"op\": null,\n" +
+                "\t\t                \"val\": null,\n" +
+                "\t\t                \"type\": \"or\",\n" +
+                "\t\t                \"field\": null,\n" +
+                "\t\t                \"conditions\":\n" +
+                "\t\t                [\n" +
+                "\t\t                    {\n" +
+                "\t\t                        \"id\": \"110\",\n" +
+                "\t\t                        \"name\": \"buyerId\",\n" +
+                "\t\t                        \"op\": null,\n" +
+                "\t\t                        \"val\":\n" +
+                "\t\t                        [\n" +
+                "\t\t                            \"20\"\n" +
+                "\t\t                        ],\n" +
+                "\t\t                        \"type\": \"enabled\",\n" +
+                "\t\t                        \"field\": null,\n" +
+                "\t\t                        \"conditions\": null\n" +
+                "\t\t                    },\n" +
+                "\t\t                    {\n" +
+                "\t\t                        \"id\": \"111\",\n" +
+                "\t\t                        \"name\": \"Switch\",\n" +
+                "\t\t                        \"op\": null,\n" +
+                "\t\t                        \"val\":\n" +
+                "\t\t                        [\n" +
+                "\t\t                            \"true\"\n" +
+                "\t\t                        ],\n" +
+                "\t\t                        \"type\": \"enabled\",\n" +
+                "\t\t                        \"field\": null,\n" +
+                "\t\t                        \"conditions\": null\n" +
+                "\t\t                    }\n" +
+                "\t\t                ]\n" +
+                "\t\t            }\n" +
+                "                ]\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": \"2\",\n" +
+                "                \"name\": null,\n" +
+                "                \"op\": null,\n" +
+                "                \"val\": null,\n" +
+                "                \"type\": \"or\",\n" +
+                "                \"field\": null,\n" +
+                "                \"conditions\":\n" +
+                "                [\n" +
+                "                    {\n" +
+                "                        \"id\": \"3\",\n" +
+                "                        \"name\": \"itemId\",\n" +
+                "                        \"op\": \"in\",\n" +
+                "                        \"val\":\n" +
+                "                        [\n" +
+                "                            \"2\",\n" +
+                "                            \"3\"\n" +
+                "                        ],\n" +
+                "                        \"type\": \"int\",\n" +
+                "                        \"field\": \"itemId\",\n" +
+                "                        \"conditions\": null\n" +
+                "                    },\n" +
+                "                    {\n" +
+                "                        \"id\": \"4\",\n" +
+                "                        \"name\": null,\n" +
+                "                        \"op\": null,\n" +
+                "                        \"val\": null,\n" +
+                "                        \"type\": \"or\",\n" +
+                "                        \"field\": null,\n" +
+                "                        \"conditions\":\n" +
+                "                        [\n" +
+                "                            {\n" +
+                "                                \"id\": \"5\",\n" +
+                "                                \"name\": \"threshold\",\n" +
+                "                                \"op\": \"gte\",\n" +
+                "                                \"val\":\n" +
+                "                                [\n" +
+                "                                    \"95\"\n" +
+                "                                ],\n" +
+                "                                \"type\": \"int\",\n" +
+                "                                \"field\": \"threshold\",\n" +
+                "                                \"conditions\": null\n" +
+                "                            },\n" +
+                "                            {\n" +
+                "                                \"id\": \"6\",\n" +
+                "                                \"name\": \"isSeller\",\n" +
+                "                                \"op\": \"eq\",\n" +
+                "                                \"val\":\n" +
+                "                                [\n" +
+                "                                    \"true\"\n" +
+                "                                ],\n" +
+                "                                \"type\": \"boolean\",\n" +
+                "                                \"field\": \"isSeller\",\n" +
+                "                                \"conditions\": null\n" +
+                "                            }\n" +
+                "                        ]\n" +
+                "                    }\n" +
+                "                ]\n" +
+                "            }\n" +
+                "        ]\n" +
+                "    }\n" +
+                "}";
         boolean result = ConditionParser.parser(conditionJson, param);
         System.out.println("evaluate result: " + result);
         System.out.println("evaluate path: ");

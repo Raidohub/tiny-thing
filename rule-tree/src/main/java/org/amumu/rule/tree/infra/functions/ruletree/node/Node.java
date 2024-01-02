@@ -18,6 +18,5 @@ public class Node {
     private String param;
     private Boolean result;
     private List<String> val;
-    private Node son;
     private List<Node> sons;
 }

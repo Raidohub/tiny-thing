@@ -6,41 +6,72 @@ import org.amumu.rule.tree.infra.functions.ruletree.node.Node;
 import org.amumu.rule.tree.infra.functions.ruletree.node.NodeWrapper;
 import org.amumu.rule.tree.infra.utils.JsonUtil;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 @Component
 public class NodeChainFactory {
 
-    public final ThreadLocal<Node> root = new ThreadLocal<>();
-    public final ThreadLocal<Node> curr = new ThreadLocal<>();
+    private final ThreadLocal<Node> root = new ThreadLocal<>();
+    private final ThreadLocal<Node> curr = new ThreadLocal<>();
+    private final ThreadLocal<LinkedList<Node>> backtrace = new ThreadLocal<>();
 
-    public void setupChain(String param, RuleTreeConditionDomain condition, Boolean result) {
-        Node currNode = curr.get();
+    /**
+     * 设置链表头节点
+     * @param param
+     * @param condition
+     * @param result
+     */
+    public void inChain(String param, RuleTreeConditionDomain condition, Boolean result) {
+        Node currNode = this.curr.get();
         Node newNode = this.buildNode(condition, param, result);
-        if (newNode.getPid().equals(currNode.getPid())) {
-            setupSons(newNode);
-            curr.set(newNode);
+        if (CollectionUtils.isEmpty(currNode.getSons())) {
+            this.initSon(newNode);
+            this.curr.set(newNode);
+
             return;
         }
-        currNode.setSon(newNode);
-        curr.set(newNode);
+        List<Node> sons = currNode.getSons();
+        sons.add(newNode);
+        this.curr.set(newNode);
     }
 
-    public void setupSons(Node newNode) {
-        Node currNode = curr.get();
-        List<Node> brothers = curr.get().getSons();
-        if (brothers == null) {
-            brothers = new ArrayList<>();
-            currNode.setSons(brothers);
+    private void initSon(Node newNode) {
+        List<Node> sons = new ArrayList<>();
+        sons.add(newNode);
+        Node currNode = this.curr.get();
+        currNode.setSons(sons);
+    }
+
+    /**
+     * 回溯栈
+     */
+    public void setupBacktracePoint() {
+        LinkedList<Node> backtrace = this.backtrace.get();
+        if (CollectionUtils.isEmpty(backtrace)) {
+            backtrace = new LinkedList<>();
+            this.backtrace.set(backtrace);
         }
-        brothers.add(newNode);
+        backtrace.add(this.curr.get());
+    }
+
+    public void resetCurr() {
+        LinkedList<Node> backTraceList = this.backtrace.get();
+        Node backTrace = backTraceList.peekLast();
+        this.curr.set(backTrace);
+    }
+
+    public void backtracePop() {
+        this.backtrace.get().pollLast();
     }
 
     public NodeWrapper buildNode(Boolean result, RuleTreeParam param) {
         NodeWrapper nodeWrapper = new NodeWrapper();
         nodeWrapper.setParam(JsonUtil.obj2JsonStr(param));
-        nodeWrapper.setRoot(root.get());
+        nodeWrapper.setRoot(this.root.get());
         nodeWrapper.setResult(result);
         this.clear();
         return nodeWrapper;
@@ -64,7 +95,7 @@ public class NodeChainFactory {
         this.curr.set(root);
     }
 
-    private Node buildNode(RuleTreeConditionDomain condition, String param, Boolean result) {
+    public Node buildNode(RuleTreeConditionDomain condition, String param, Boolean result) {
         Node node = new Node();
         node.setResult(result);
         node.setParam(param);
